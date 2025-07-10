@@ -1,0 +1,16 @@
+@import "tailwindcss";/* Add to your CSS file */
+@media print, screen {
+  .pdf-safe * {
+    color: black !important;
+    background-color: white !important;
+    border-color: #ccc !important;
+  }
+  
+  .pdf-safe .bg-blue-600 {
+    background-color: #3b82f6 !important;
+  }
+  
+  .pdf-safe .text-white {
+    color: white !important;
+  }
+}

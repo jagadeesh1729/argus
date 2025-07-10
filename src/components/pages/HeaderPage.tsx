@@ -1,0 +1,77 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+// import '../index.css';
+import { useRecoilState } from 'recoil';
+import {
+  contractNumberState,
+  deliveryOrderNoState,
+  workOrderState,
+  locationState,
+  contractorNameState,
+} from '../../recoil/state/formState';
+import {  useState } from 'react';
+import EditableText from '../atoms/EditableText';
+import { EditableRow } from '../atoms/EditableRow';
+
+
+
+
+const HeaderPage = () => {
+  const [contractNumber, setContractNumber] = useRecoilState(contractNumberState);
+  const [deliveryOrderNo, setDeliveryOrderNo] = useRecoilState(deliveryOrderNoState);
+  const [workOrder, setWorkOrder] = useRecoilState(workOrderState);
+  const [location, setLocation] = useRecoilState(locationState);
+  const [contractorName, setContractorName] = useRecoilState(contractorNameState);
+
+  const [title, setTitle] = useState('Quality Control Plan');
+  const [companyName, setCompanyName] = useState('Argus/CJW JV 3, LLC');
+  const [addressLine1, setAddressLine1] = useState('30 Catoctin Circle SE, Suite 10');
+  const [addressLine2, setAddressLine2] = useState('Leesburg, VA 20175');
+  const [contactNumberLabel, setcontactNumberLabel] = useState("Contract Number:")
+  const [deliveryOrderLabel, setdeliveryOrderLabel] = useState("Delivery Order No:")
+  const [workOrderLabel, setworkOrderLabel] = useState("Work Order:")
+
+  return (
+    <div className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] h-[1123px] mx-auto shadow overflow-hidden break-inside-avoid page-break flex flex-col justify-between">
+      {/* Logos */}
+      <div className="flex flex-col items-center space-y-6 mt-10">
+        <img src="/assets/companyLogo.png" alt="Argus Logo" className="object-contain" />
+        <img src="/assets/contractorLogo.png" alt="CJW Logo" className="object-contain w-80" />
+      </div>
+
+      {/* Title */}
+      <hr className="border-blue-700 my-6" />
+      <EditableText
+        tag="h1"
+        defaultValue={title}
+        onSave={setTitle}
+        className="text-3xl font-bold text-center text-[#001b8f] uppercase tracking-wide"
+      />
+      <hr className="border-blue-700 my-6" />
+
+      {/* Contractor Name & Location */}
+      <div className="text-center text-black space-y-3 py-6 text-lg font-semibold">
+        <EditableText tag="p" defaultValue={contractorName} onSave={setContractorName} />
+        <EditableText tag="p" defaultValue={location} onSave={setLocation} />
+      </div>
+
+  
+      <div className="mt-8 max-w-2xl mx-auto space-y-4 text-base font-medium">
+        <EditableRow label={<EditableText tag="p" defaultValue={contactNumberLabel} onSave={setcontactNumberLabel}/>} value={contractNumber} onChange={setContractNumber} />
+        <EditableRow label={<EditableText tag="p" defaultValue={deliveryOrderLabel} onSave={setdeliveryOrderLabel}/>} value={deliveryOrderNo} onChange={setDeliveryOrderNo} />
+        <EditableRow label={<EditableText tag="p" defaultValue={workOrderLabel} onSave={setworkOrderLabel}/>} value={workOrder} onChange={setWorkOrder} />
+      </div>
+
+      {/* Footer */}
+      <div className="text-center text-[#001b8f] font-medium text-sm mt-auto space-y-1">
+        <EditableText tag="p" defaultValue={companyName} onSave={setCompanyName} />
+        <EditableText tag="p" defaultValue={addressLine1} onSave={setAddressLine1} />
+        <EditableText tag="p" defaultValue={addressLine2} onSave={setAddressLine2} />
+      </div>
+    </div>
+  );
+};
+
+
+
+
+export default HeaderPage;
