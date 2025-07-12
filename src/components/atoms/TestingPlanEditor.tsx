@@ -1,7 +1,10 @@
 import { useRecoilValue } from "recoil";
-import { contractNumberState, contractorNameState, deliveryOrderNoState, locationState, workDescriptionState, workOrderState } from "../../recoil/state/formState";
+import { contractNumberState, contractorNameState, deliveryOrderNoState, locationState,  workOrderState } from "../../recoil/state/formState";
 import { useState } from "react";
-import EditableText from "./EditableText";
+import EditableText from "./EditableText"; // Assuming EditableText is in the same directory or accessible
+
+// Import the common page classes from your new utility file
+import { PAGE_COMMON_CLASSES, PAGE_NUMBER_PLACEHOLDER_CLASSES, INNER_PAGE_CONTENT_CLASSES } from '../../utils/pageStyles';
 
 type TestPlanLogItem = {
   id: number;
@@ -25,7 +28,7 @@ function TestingPlanEditor() {
   const contractNumber = useRecoilValue(contractNumberState);
   const deliveryOrderNo = useRecoilValue(deliveryOrderNoState);
   const workOrder = useRecoilValue(workOrderState);
-  const projectTitle = useRecoilValue(workDescriptionState); // Assuming workDescriptionState holds the project title
+  // const projectTitle = useRecoilValue(workDescriptionState); // Assuming workDescriptionState holds the project title
   const location = useRecoilValue(locationState);
   const contractorName = useRecoilValue(contractorNameState);
 
@@ -70,13 +73,18 @@ function TestingPlanEditor() {
   };
 
   return (
-    <div className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] h-[1123px] mx-auto shadow overflow-hidden break-inside-avoid page-break">
-      {/* Removed fixed height and overflow-hidden from this div */}
-      <div className="">
-        {/* Black border - simulating the image */}
-        
+    // Outermost div now uses the reusable PAGE_COMMON_CLASSES constant
+    // Removed fixed height h-[1123px] and overflow-hidden from this div
+    <div className={PAGE_COMMON_CLASSES}>
+      {/* Page number placeholder, positioned top-right */}
+      <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}>
+        {/* Page number will be inserted here by Flow's useEffect */}
+      </div>
+
+      {/* Main content wrapper: Now uses INNER_PAGE_CONTENT_CLASSES for padding and flex-col layout */}
+      <div className={INNER_PAGE_CONTENT_CLASSES}>
         {/* Page Title */}
-        <div className="text-center mb-8 mt-10 ">
+        <div className="text-center mb-8 mt-10">
           <EditableText
             tag="h1"
             defaultValue={pageTitle}
@@ -86,16 +94,17 @@ function TestingPlanEditor() {
         </div>
 
         {/* Top Information Boxes */}
-        <div className="mt-8  px-4 grid grid-cols-3 gap-4 border border-b  w-[741px]">
+        {/* Removed fixed width w-[741px] and redundant px-4 */}
+        <div className="mt-8 grid grid-cols-3 gap-4 border border-black">
           {/* CONTRACT NUMBER Box */}
-          <div className=" p-2 flex flex-col justify-between border-r">
+          <div className="p-2 flex flex-col justify-between border-r border-black">
             <EditableText
               tag="strong"
               defaultValue={contractNumberLabel}
               onSave={setContractNumberLabel}
               className="text-sm text-center font-bold italic mb-2"
             />
-            <div className="text-xs space-y-1 ">
+            <div className="text-xs space-y-1">
               <EditableText
                 tag="p"
                 defaultValue={`Contract Number: ${contractNumber}`}
@@ -118,7 +127,7 @@ function TestingPlanEditor() {
           </div>
 
           {/* PROJECT TITLE AND LOCATION Box */}
-          <div className=" p-2 flex flex-col justify-between border-r">
+          <div className="p-2 flex flex-col justify-between border-r border-black">
             <EditableText
               tag="strong"
               defaultValue={projectTitleLocationLabel}
@@ -128,7 +137,7 @@ function TestingPlanEditor() {
             <div className="text-xs space-y-1">
               <EditableText
                 tag="p"
-                defaultValue={`${projectTitle}`}
+                defaultValue={`${contractorName}`}
                 onSave={() => { /* Recoil value */ }}
                 className="font-normal"
               />
@@ -142,12 +151,12 @@ function TestingPlanEditor() {
           </div>
 
           {/* CONTRACTOR Box */}
-          <div className=" p-2 flex flex-col justify-between ">
+          <div className="p-2 flex flex-col justify-between">
             <EditableText
               tag="strong"
               defaultValue={contractorLabel}
               onSave={setContractorLabel}
-              className="text-sm text-center font-bold italic mb-2 "
+              className="text-sm text-center font-bold italic mb-2"
             />
             <div className="text-xs">
               <EditableText
@@ -161,18 +170,18 @@ function TestingPlanEditor() {
         </div>
 
         {/* Testing Plan and Log Table */}
-        <div className="">
-          {/* Removed overflow-x-auto from this div */}
-          <table className="min-w-full divide-y divide-black text-xs border border-black">
+        {/* Removed overflow-x-auto to prevent horizontal scrolling */}
+        <div className="mt-8">
+          <table className="min-w-full table-fixed divide-y divide-black text-xs border border-black">
             <thead>
               <tr className="">
-                <th rowSpan={2} className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black w-[8%]">
+                <th rowSpan={2} className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black w-[12%]">
                   <EditableText tag="span" defaultValue="SPECIFICATION SECTION AND PARAGRAPH NUMBER" onSave={() => {}} className="block text-center leading-tight" />
                 </th>
-                <th rowSpan={2} className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black w-[8%]">
+                <th rowSpan={2} className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black w-[10%]">
                   <EditableText tag="span" defaultValue="ITEM OF WORK" onSave={() => {}} className="block text-center leading-tight" />
                 </th>
-                <th rowSpan={2} className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black w-[8%]">
+                <th rowSpan={2} className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black w-[10%]">
                   <EditableText tag="span" defaultValue="TEST REQUIRED" onSave={() => {}} className="block text-center leading-tight" />
                 </th>
                 <th colSpan={2} className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black w-[8%]">
@@ -193,27 +202,28 @@ function TestingPlanEditor() {
                 <th colSpan={2} className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-b border-black w-[8%]">
                   <EditableText tag="span" defaultValue="DATE FORWARDED TO CONTR. OFF." onSave={() => {}} className="block text-center leading-tight" />
                 </th>
-                <th rowSpan={2} className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-b border-black border-l w-[8%]">
+                <th rowSpan={2} className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-b border-black border-l w-[20%]">
                   <EditableText tag="span" defaultValue="REMARKS" onSave={() => {}} className="block text-center leading-tight" />
                 </th>
               </tr>
               <tr>
-                <th className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black">
+                {/* These widths are relative to their parent colSpan, but here they are direct percentages of the table width */}
+                <th className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black w-[4%]">
                   <EditableText tag="span" defaultValue="YES" onSave={() => {}} className="block text-center" />
                 </th>
-                <th className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black">
+                <th className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black w-[4%]">
                   <EditableText tag="span" defaultValue="NO" onSave={() => {}} className="block text-center" />
                 </th>
-                <th className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black">
+                <th className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black w-[4%]">
                   <EditableText tag="span" defaultValue="ON SITE" onSave={() => {}} className="block text-center" />
                 </th>
-                <th className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black">
+                <th className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-r border-b border-black w-[4%]">
                   <EditableText tag="span" defaultValue="OFF SITE" onSave={() => {}} className="block text-center" />
                 </th>
-                <th className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-b border-black">
+                <th className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-b border-black w-[4%]">
                   <EditableText tag="span" defaultValue="DATE" onSave={() => {}} className="block text-center" />
                 </th>
-                <th className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-b border-black">
+                <th className="px-1 py-1 text-center font-medium text-gray-700 uppercase tracking-wider border-b border-black w-[4%]">
                   <EditableText tag="span" defaultValue="TO CONTR." onSave={() => {}} className="block text-center" />
                 </th>
               </tr>
@@ -221,7 +231,7 @@ function TestingPlanEditor() {
             <tbody className="bg-white divide-y divide-black">
               {tableData.map((row, rowIndex) => (
                 <tr key={row.id}>
-                  <td className="px-1 py-1 whitespace-nowrap border-r border-black">
+                  <td className="px-1 py-1 border-r border-black"> {/* Removed whitespace-nowrap */}
                     <EditableText
                       tag="div"
                       defaultValue={row.specSection}
@@ -229,7 +239,7 @@ function TestingPlanEditor() {
                       className="w-full h-full min-h-[24px] outline-none focus:bg-blue-50"
                     />
                   </td>
-                  <td className="px-1 py-1 whitespace-nowrap border-r border-black">
+                  <td className="px-1 py-1 border-r border-black"> {/* Removed whitespace-nowrap */}
                     <EditableText
                       tag="div"
                       defaultValue={row.itemOfWork}
@@ -237,7 +247,7 @@ function TestingPlanEditor() {
                       className="w-full h-full min-h-[24px] outline-none focus:bg-blue-50"
                     />
                   </td>
-                  <td className="px-1 py-1 whitespace-nowrap border-r border-black">
+                  <td className="px-1 py-1 border-r border-black"> {/* Removed whitespace-nowrap */}
                     <EditableText
                       tag="div"
                       defaultValue={row.testRequired}
@@ -245,7 +255,7 @@ function TestingPlanEditor() {
                       className="w-full h-full min-h-[24px] outline-none focus:bg-blue-50"
                     />
                   </td>
-                  <td className="px-1 py-1 whitespace-nowrap border-r border-black">
+                  <td className="px-1 py-1 border-r border-black"> {/* Removed whitespace-nowrap */}
                     <EditableText
                       tag="div"
                       defaultValue={row.yes}
@@ -253,7 +263,7 @@ function TestingPlanEditor() {
                       className="w-full h-full min-h-[24px] outline-none focus:bg-blue-50"
                     />
                   </td>
-                  <td className="px-1 py-1 whitespace-nowrap border-r border-black">
+                  <td className="px-1 py-1 border-r border-black"> {/* Removed whitespace-nowrap */}
                     <EditableText
                       tag="div"
                       defaultValue={row.no}
@@ -261,7 +271,7 @@ function TestingPlanEditor() {
                       className="w-full h-full min-h-[24px] outline-none focus:bg-blue-50"
                     />
                   </td>
-                  <td className="px-1 py-1 whitespace-nowrap border-r border-black">
+                  <td className="px-1 py-1 border-r border-black"> {/* Removed whitespace-nowrap */}
                     <EditableText
                       tag="div"
                       defaultValue={row.sampledBy}
@@ -269,7 +279,7 @@ function TestingPlanEditor() {
                       className="w-full h-full min-h-[24px] outline-none focus:bg-blue-50"
                     />
                   </td>
-                  <td className="px-1 py-1 whitespace-nowrap border-r border-black">
+                  <td className="px-1 py-1 border-r border-black"> {/* Removed whitespace-nowrap */}
                     <EditableText
                       tag="div"
                       defaultValue={row.testedBy}
@@ -277,7 +287,7 @@ function TestingPlanEditor() {
                       className="w-full h-full min-h-[24px] outline-none focus:bg-blue-50"
                     />
                   </td>
-                  <td className="px-1 py-1 whitespace-nowrap border-r border-black">
+                  <td className="px-1 py-1 border-r border-black"> {/* Removed whitespace-nowrap */}
                     <EditableText
                       tag="div"
                       defaultValue={row.onSite}
@@ -285,7 +295,7 @@ function TestingPlanEditor() {
                       className="w-full h-full min-h-[24px] outline-none focus:bg-blue-50"
                     />
                   </td>
-                  <td className="px-1 py-1 whitespace-nowrap border-r border-black">
+                  <td className="px-1 py-1 border-r border-black"> {/* Removed whitespace-nowrap */}
                     <EditableText
                       tag="div"
                       defaultValue={row.offSite}
@@ -293,7 +303,7 @@ function TestingPlanEditor() {
                       className="w-full h-full min-h-[24px] outline-none focus:bg-blue-50"
                     />
                   </td>
-                  <td className="px-1 py-1 whitespace-nowrap border-r border-black">
+                  <td className="px-1 py-1 border-r border-black"> {/* Removed whitespace-nowrap */}
                     <EditableText
                       tag="div"
                       defaultValue={row.dateCompleted}
@@ -301,7 +311,7 @@ function TestingPlanEditor() {
                       className="w-full h-full min-h-[24px] outline-none focus:bg-blue-50"
                     />
                   </td>
-                  <td className="px-1 py-1 whitespace-nowrap border-r border-black">
+                  <td className="px-1 py-1 border-r border-black"> {/* Removed whitespace-nowrap */}
                     <EditableText
                       tag="div"
                       defaultValue={row.dateForwarded}
@@ -309,7 +319,7 @@ function TestingPlanEditor() {
                       className="w-full h-full min-h-[24px] outline-none focus:bg-blue-50"
                     />
                   </td>
-                  <td className="px-1 py-1 whitespace-nowrap">
+                  <td className="px-1 py-1"> {/* Removed whitespace-nowrap */}
                     <EditableText
                       tag="div"
                       defaultValue={row.remarks}
@@ -317,11 +327,7 @@ function TestingPlanEditor() {
                       className="w-full h-full min-h-[24px] outline-none focus:bg-blue-50"
                     />
                   </td>
-                  <td className="border-b border ">
-
-                  </td>
                 </tr>
-                
               ))}
             </tbody>
           </table>

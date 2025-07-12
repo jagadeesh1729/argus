@@ -1,8 +1,11 @@
-// components/QCResponsibilities.tsx
 import { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { shortCompanyNameState } from '../../recoil/state/formState';
 import EditableText from '../atoms/EditableText';
+
+// Import the common page classes from your new utility file
+import { PAGE_COMMON_CLASSES, PAGE_NUMBER_PLACEHOLDER_CLASSES, INNER_PAGE_CONTENT_CLASSES } from '../../utils/pageStyles';
+
 
 const QCResponsibilities = () => {
   const companyName = useRecoilValue(shortCompanyNameState);
@@ -54,84 +57,99 @@ const QCResponsibilities = () => {
 
   return (
     <>
-      <div className="p-6 border border-gray-300 bg-white w-[794px] h-[1123px] mx-auto shadow break-inside-avoid page-break">
-        <EditableText
-          defaultValue={heading}
-          onSave={setHeading}
-          tag="h1"
-          className="text-center font-bold underline text-lg mb-4"
-        />
+      {/* First Page Section */}
+      <div className={PAGE_COMMON_CLASSES}>
+        {/* Page number placeholder */}
+        <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}></div>
 
-        <p className="mb-4">
-          <span className="bg-yellow-300 font-bold">{companyName}</span>,&nbsp;
+        {/* Inner content wrapper */}
+        <div className={INNER_PAGE_CONTENT_CLASSES}>
           <EditableText
-            defaultValue={description.replace(`${companyName}, `, '')}
-            onSave={(val) => setDescription(`${companyName}, ${val}`)}
-            tag="span"
+            defaultValue={heading}
+            onSave={setHeading}
+            tag="h1"
+            className="text-center font-bold underline text-lg mb-4 text-amber-800"
           />
-        </p>
 
-        <ul className="list-disc list-inside mb-6">
-          {bullets.map((item, idx) => (
-            <li key={idx} className="mb-1">
-              <EditableText
-                defaultValue={item}
-                onSave={(val) => {
-                  const updated = [...bullets];
-                  updated[idx] = val;
-                  setBullets(updated);
-                }}
-                tag="span"
-              />
-            </li>
-          ))}
-        </ul>
+          <p className="mb-4">
+            <span className=" font-bold">{companyName}</span>,&nbsp;
+            <EditableText
+              defaultValue={description.replace(`${companyName}, `, '')}
+              onSave={(val) => setDescription(`${companyName}, ${val}`)}
+              tag="span"
+            />
+          </p>
+
+          <ul className="list-disc list-inside mb-6">
+            {bullets.map((item, idx) => (
+              <li key={idx} className="mb-1">
+                <EditableText
+                  defaultValue={item}
+                  onSave={(val) => {
+                    const updated = [...bullets];
+                    updated[idx] = val;
+                    setBullets(updated);
+                  }}
+                  tag="span"
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
 
-      <div className="p-6 border border-gray-300 bg-white w-[794px] h-[1123px] mx-auto shadow break-inside-avoid page-break">
-        <EditableText
-          defaultValue={meetingTitle}
-          onSave={setMeetingTitle}
-          tag="h1"
-          className="font-bold mb-2"
-        />
-        <ul className="list-disc list-inside mb-6">
-          {meetingItems.map((item, idx) => (
-            <li key={idx} className="mb-1">
-              <EditableText
-                defaultValue={item}
-                onSave={(val) => {
-                  const updated = [...meetingItems];
-                  updated[idx] = val;
-                  setMeetingItems(updated);
-                }}
-                tag="span"
-              />
-            </li>
-          ))}
-        </ul>
+      {/* Second Page Section */}
+      {/* Each page needs its own PAGE_COMMON_CLASSES and PAGE_NUMBER_PLACEHOLDER_CLASSES */}
+      <div className={PAGE_COMMON_CLASSES}>
+        {/* Page number placeholder */}
+        <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}></div>
 
-        <EditableText
-          defaultValue={phasesTitle}
-          onSave={setPhasesTitle}
-          tag="h1"
-          className="font-bold mb-2"
-        />
-        <ul className="list-disc list-inside">
-          {phases.map((item, idx) => (
-            <li key={idx} className="mb-1">
-              <EditableText
-                defaultValue={item}
-                onSave={(val) => {
-                  const updated = [...phases];
-                  updated[idx] = val;
-                  setPhases(updated);
-                }}
-                tag="span"
-              />
-            </li>
-          ))}
-        </ul>
+        {/* Inner content wrapper */}
+        <div className={INNER_PAGE_CONTENT_CLASSES}>
+          <EditableText
+            defaultValue={meetingTitle}
+            onSave={setMeetingTitle}
+            tag="h1"
+            className="font-bold mb-2"
+          />
+          <ul className="list-disc list-inside mb-6">
+            {meetingItems.map((item, idx) => (
+              <li key={idx} className="mb-1">
+                <EditableText
+                  defaultValue={item}
+                  onSave={(val) => {
+                    const updated = [...meetingItems];
+                    updated[idx] = val;
+                    setMeetingItems(updated);
+                  }}
+                  tag="span"
+                />
+              </li>
+            ))}
+          </ul>
+
+          <EditableText
+            defaultValue={phasesTitle}
+            onSave={setPhasesTitle}
+            tag="h1"
+            className="font-bold mb-2"
+          />
+          <ul className="list-disc list-inside">
+            {phases.map((item, idx) => (
+              <li key={idx} className="mb-1">
+                <EditableText
+                  defaultValue={item}
+                  onSave={(val) => {
+                    const updated = [...phases];
+                    updated[idx] = val;
+                    setPhases(updated);
+                  }}
+                  tag="span"
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
       </div>
     </>
   );

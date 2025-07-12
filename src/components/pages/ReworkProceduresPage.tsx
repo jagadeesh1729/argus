@@ -1,7 +1,11 @@
 import { useState } from "react";
-import EditableText from "../atoms/EditableText";
+import EditableText from "../atoms/EditableText"; // Corrected path to atoms
 import { useRecoilValue } from "recoil";
-import { shortCompanyNameState } from "../../recoil/state/formState";
+import { shortCompanyNameState } from "../../recoil/state/formState"; // Corrected path to recoil state
+
+// Import the common page classes from your new utility file
+import { PAGE_COMMON_CLASSES, PAGE_NUMBER_PLACEHOLDER_CLASSES, INNER_PAGE_CONTENT_CLASSES } from '../../utils/pageStyles';
+
 
 function ReworkProceduresPage() {
    const name= useRecoilValue(shortCompanyNameState)
@@ -37,11 +41,15 @@ function ReworkProceduresPage() {
 
 
   return (
-    <div className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] h-[1123px] mx-auto shadow overflow-hidden break-inside-avoid page-break">
-      <div className="">
-        {/* Yellow border - simulating the image */}
-        <div className=""></div>
+    // Outermost div now uses the reusable PAGE_COMMON_CLASSES constant
+    <div className={PAGE_COMMON_CLASSES}>
+      {/* Page number placeholder, positioned top-right */}
+      <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}>
+        {/* Page number will be inserted here by Flow's useEffect */}
+      </div>
 
+      {/* Main content wrapper: Now uses INNER_PAGE_CONTENT_CLASSES for padding and flex-col layout */}
+      <div className={INNER_PAGE_CONTENT_CLASSES}>
         {/* Page Title */}
         <div className="text-center mb-8">
           <EditableText
@@ -129,7 +137,7 @@ function ReworkProceduresPage() {
         </div>
 
         {/* Bullet Points */}
-        <div className="mt-6 mx-20 relative z-10">
+        <div className="mt-6"> {/* Removed mx-20 as INNER_PAGE_CONTENT_CLASSES already provides horizontal padding */}
           <EditableText
             tag="p"
             defaultValue={bulletPoint1}

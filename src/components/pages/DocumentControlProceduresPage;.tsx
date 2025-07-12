@@ -1,5 +1,9 @@
 import { useState } from "react";
-import EditableText from "../atoms/EditableText";
+import EditableText from "../atoms/EditableText"; // Assuming EditableText is correctly imported
+
+// Import the common page classes from your new utility file
+import { PAGE_COMMON_CLASSES, PAGE_NUMBER_PLACEHOLDER_CLASSES, INNER_PAGE_CONTENT_CLASSES } from '../../utils/pageStyles';
+
 
 function DocumentControlProceduresPage() {
   const [pageTitle, setPageTitle] = useState('13. Document Control Procedures');
@@ -49,11 +53,15 @@ function DocumentControlProceduresPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 font-sans">
-      <div className="bg-white shadow-lg rounded-lg p-8 w-[794px] h-[1123px] mx-auto relative overflow-hidden">
-        {/* Yellow border - simulating the image */}
-        <div className="absolute inset-0 border-4 border-yellow-500 rounded-lg"></div>
+    // Outermost div now uses the reusable PAGE_COMMON_CLASSES constant
+    <div className={PAGE_COMMON_CLASSES}>
+      {/* Page number placeholder, positioned top-right */}
+      <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}>
+        {/* Page number will be inserted here by Flow's useEffect */}
+      </div>
 
+      {/* Main content wrapper: Now uses INNER_PAGE_CONTENT_CLASSES for padding and flex-col layout */}
+      <div className={INNER_PAGE_CONTENT_CLASSES}>
         {/* Page Title */}
         <div className="text-center mb-8 mt-10">
           <EditableText
@@ -65,7 +73,7 @@ function DocumentControlProceduresPage() {
         </div>
 
         {/* Introduction Text */}
-        <div className="mt-8 mx-16">
+        <div className="mt-8"> {/* Removed mx-16 as INNER_PAGE_CONTENT_CLASSES already provides padding */}
           <EditableText
             tag="p"
             defaultValue={introText}
@@ -75,7 +83,7 @@ function DocumentControlProceduresPage() {
         </div>
 
         {/* Section: Drawing and Document Control */}
-        <div className="mt-8 mx-16">
+        <div className="mt-8"> {/* Removed mx-16 */}
           <EditableText
             tag="strong"
             defaultValue={drawingControlTitle}
@@ -97,7 +105,7 @@ function DocumentControlProceduresPage() {
         </div>
 
         {/* Section: Inspections and Tests */}
-        <div className="mt-8 mx-16">
+        <div className="mt-8"> {/* Removed mx-16 */}
           <EditableText
             tag="strong"
             defaultValue={inspectionsTestsTitle}
@@ -134,7 +142,7 @@ function DocumentControlProceduresPage() {
             onSave={setInspectionsTestsD}
             className="mt-2 text-sm leading-relaxed"
           />
-          <ol className="list-decimal list-inside ml-20  mt-2">
+          <ol className="list-decimal list-inside ml-20 mt-2">
             {finalAcceptancePoints.map((point, index) => (
               <li key={index} className="text-sm ">
                 <EditableText

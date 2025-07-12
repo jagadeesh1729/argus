@@ -1,7 +1,15 @@
-import { useRecoilState } from "recoil";
-import { companyNameState, shortCompanyNameState, workDescriptionState } from "../../recoil/state/formState";
-import EditableText from "../atoms/EditableText";
-import { useState } from "react";
+import { useState } from 'react';
+import { useRecoilState,  } from 'recoil';
+import {
+  companyNameState,
+  shortCompanyNameState,
+  workDescriptionState
+} from '../../recoil/state/formState';
+import EditableText from '../atoms/EditableText';
+
+// Import the common page classes from your new utility file
+import { PAGE_COMMON_CLASSES, PAGE_NUMBER_PLACEHOLDER_CLASSES, INNER_PAGE_CONTENT_CLASSES } from '../../utils/pageStyles';
+
 
 const Purpose = () => {
   const [companyName, setCompanyName] = useRecoilState(companyNameState);
@@ -24,31 +32,39 @@ const Purpose = () => {
   );
 
   return (
-    <div className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] h-[1123px] mx-auto shadow overflow-hidden break-inside-avoid page-break">
-      <EditableText
-        tag="div"
-        defaultValue={title}
-        onSave={setTitle}
-        className="underline text-center text-amber-700"
-      />
-
-      <div className="pt-6">
-        <EditableText tag="span" defaultValue={introText1} onSave={setIntroText1} />{" "}
-        <EditableText tag="span" defaultValue={companyName} onSave={setCompanyName} className="font-semibold" />{" "}
-        <EditableText tag="span" defaultValue={introText2} onSave={setIntroText2} />
+    // Outermost div now uses the reusable PAGE_COMMON_CLASSES constant
+    <div className={PAGE_COMMON_CLASSES}>
+      {/* Page number placeholder, positioned top-right */}
+      <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}>
+        {/* Page number will be inserted here by Flow's useEffect */}
       </div>
 
-      <div className="pt-6">
-        <b>
-          <EditableText tag="span" defaultValue={descriptionLabel} onSave={setDescriptionLabel} /></b>{" "}
-          <EditableText tag="span" defaultValue={workDescription} onSave={setWorkDescription} />
-       
-      </div>
+      {/* Main content wrapper: Now uses INNER_PAGE_CONTENT_CLASSES for padding and flex-col layout */}
+      <div className={INNER_PAGE_CONTENT_CLASSES}>
+        <EditableText
+          tag="h1"
+          defaultValue={title}
+          onSave={setTitle}
+          className="underline text-center text-amber-700"
+        />
 
-      <div className="pt-6">
-        <EditableText tag="span" defaultValue={shortCompanyName} onSave={setShortCompanyName} className="font-semibold" />{" "}
-        <EditableText tag="span" defaultValue={footerIntro} onSave={setFooterIntro} />{" "}
-        <EditableText tag="span" defaultValue={footerRest} onSave={setFooterRest} />
+        <div className="pt-6">
+          <EditableText tag="span" defaultValue={introText1} onSave={setIntroText1} />{" "}
+          <EditableText tag="span" defaultValue={companyName} onSave={setCompanyName} className="font-semibold" />{" "}
+          <EditableText tag="span" defaultValue={introText2} onSave={setIntroText2} />
+        </div>
+
+        <div className="pt-6">
+          <b>
+            <EditableText tag="span" defaultValue={descriptionLabel} onSave={setDescriptionLabel} /></b>{" "}
+            <EditableText tag="span" defaultValue={workDescription} onSave={setWorkDescription} />
+        </div>
+
+        <div className="pt-6">
+          <EditableText tag="span" defaultValue={shortCompanyName} onSave={setShortCompanyName} className="font-semibold" />{" "}
+          <EditableText tag="span" defaultValue={footerIntro} onSave={setFooterIntro} />{" "}
+          <EditableText tag="span" defaultValue={footerRest} onSave={setFooterRest} />
+        </div>
       </div>
     </div>
   );

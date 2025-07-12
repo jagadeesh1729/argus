@@ -1,8 +1,11 @@
-// components/pages/TrainingLogPage.tsx
 import EditableText from '../atoms/EditableText';
 import { useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { shortCompanyNameState } from '../../recoil/state/formState';
+
+// Import the common page classes from your new utility file
+import { PAGE_COMMON_CLASSES, PAGE_NUMBER_PLACEHOLDER_CLASSES, INNER_PAGE_CONTENT_CLASSES } from '../../utils/pageStyles';
+
 
 const TrainingLogPage = () => {
   const shortCompanyName = useRecoilValue(shortCompanyNameState);
@@ -39,46 +42,55 @@ const TrainingLogPage = () => {
   ]);
 
   return (
-    <div className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] h-[1123px] mx-auto shadow break-inside-avoid page-break text-sm">
-      <EditableText defaultValue={title1} onSave={setTitle1} tag="h1" className="text-center text-amber-800 font-bold mb-4 text-sm" />
-      <EditableText defaultValue={desc1} onSave={setDesc1} tag="p" className="mb-6" />
+    // Outermost div now uses the reusable PAGE_COMMON_CLASSES constant
+    <div className={PAGE_COMMON_CLASSES}>
+      {/* Page number placeholder, positioned top-right */}
+      <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}>
+        {/* Page number will be inserted here by Flow's useEffect */}
+      </div>
 
-      <EditableText defaultValue={title2} onSave={setTitle2} tag="h1" className="text-center text-amber-800 font-bold mb-4 text-sm" />
-      <EditableText defaultValue={desc2} onSave={setDesc2} tag="p" className="mb-4" />
+      {/* Main content wrapper: Now uses INNER_PAGE_CONTENT_CLASSES for padding and flex-col layout */}
+      <div className={INNER_PAGE_CONTENT_CLASSES}>
+        <EditableText defaultValue={title1} onSave={setTitle1} tag="h1" className="text-center text-amber-800 font-bold mb-4 text-sm" />
+        <EditableText defaultValue={desc1} onSave={setDesc1} tag="p" className="mb-6" />
 
-      <EditableText defaultValue={sectionA} onSave={setSectionA} tag="p" className="font-bold mb-2 ml-8" />
-      <ol className="list-decimal mb-6 ml-24">
-        {discussionPoints.map((point, idx) => (
-          <li key={idx} className="mb-1">
-            <EditableText
-              defaultValue={point}
-              onSave={(val) => {
-                const updated = [...discussionPoints];
-                updated[idx] = val;
-                setDiscussionPoints(updated);
-              }}
-              tag="span"
-            />
-          </li>
-        ))}
-      </ol>
+        <EditableText defaultValue={title2} onSave={setTitle2} tag="h1" className="text-center text-amber-800 font-bold mb-4 text-sm" />
+        <EditableText defaultValue={desc2} onSave={setDesc2} tag="p" className="mb-4" />
 
-      <EditableText defaultValue={sectionB} onSave={setSectionB} tag="p" className="font-bold mb-2 ml-8" />
-      <ol className="list-decimal ml-24">
-        {trainingPoints.map((point, idx) => (
-          <li key={idx} className="mb-1">
-            <EditableText
-              defaultValue={point}
-              onSave={(val) => {
-                const updated = [...trainingPoints];
-                updated[idx] = val;
-                setTrainingPoints(updated);
-              }}
-              tag="span"
-            />
-          </li>
-        ))}
-      </ol>
+        <EditableText defaultValue={sectionA} onSave={setSectionA} tag="p" className="font-bold mb-2 ml-8" />
+        <ol className="list-decimal mb-6 ml-24">
+          {discussionPoints.map((point, idx) => (
+            <li key={idx} className="mb-1">
+              <EditableText
+                defaultValue={point}
+                onSave={(val) => {
+                  const updated = [...discussionPoints];
+                  updated[idx] = val;
+                  setDiscussionPoints(updated);
+                }}
+                tag="span"
+              />
+            </li>
+          ))}
+        </ol>
+
+        <EditableText defaultValue={sectionB} onSave={setSectionB} tag="p" className="font-bold mb-2 ml-8" />
+        <ol className="list-decimal ml-24">
+          {trainingPoints.map((point, idx) => (
+            <li key={idx} className="mb-1">
+              <EditableText
+                defaultValue={point}
+                onSave={(val) => {
+                  const updated = [...trainingPoints];
+                  updated[idx] = val;
+                  setTrainingPoints(updated);
+                }}
+                tag="span"
+              />
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   );
 };

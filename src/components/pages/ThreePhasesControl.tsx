@@ -1,6 +1,9 @@
-// components/pages/ThreePhasesControl.tsx
 import { useState } from 'react';
 import EditableText from '../atoms/EditableText';
+
+// Import the common page classes from your new utility file
+import { PAGE_COMMON_CLASSES, PAGE_NUMBER_PLACEHOLDER_CLASSES, INNER_PAGE_CONTENT_CLASSES } from '../../utils/pageStyles';
+
 
 const ThreePhasesControl = () => {
   const [heading, setHeading] = useState("15. Procedures for Performing the Three Phases of Control");
@@ -53,54 +56,63 @@ const ThreePhasesControl = () => {
   ]);
 
   return (
-    <div className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] min-h-[1123px] mx-auto shadow overflow-hidden page-break">
-      <EditableText defaultValue={heading} onSave={setHeading} tag="h1" className="text-center font-bold underline mb-6 text-amber-800" />
+    // Outermost div now uses the reusable PAGE_COMMON_CLASSES constant
+    <div className={PAGE_COMMON_CLASSES}>
+      {/* Page number placeholder, positioned top-right */}
+      <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}>
+        {/* Page number will be inserted here by Flow's useEffect */}
+      </div>
 
-      <EditableText defaultValue={prepTitle} onSave={setPrepTitle} tag="h1" className="font-bold mb-2" />
-      <EditableText defaultValue={prepDesc} onSave={setPrepDesc} tag="p" className="mb-2" />
-      <ol className="list-[lower-alpha] pl-6 mb-2">
-        {prepPoints.map((pt, i) => (
-          <li key={i} className="mb-1">
-            <EditableText defaultValue={pt} onSave={(val) => {
-              const updated = [...prepPoints];
-              updated[i] = val;
-              setPrepPoints(updated);
-            }} tag="span" />
-          </li>
-        ))}
-      </ol>
-      <EditableText defaultValue={prepNote} onSave={setPrepNote} tag="p" className="mb-4" />
+      {/* Main content wrapper: Now uses INNER_PAGE_CONTENT_CLASSES for padding and flex-col layout */}
+      <div className={INNER_PAGE_CONTENT_CLASSES}>
+        <EditableText defaultValue={heading} onSave={setHeading} tag="h1" className="text-center font-bold underline mb-6 text-amber-800" />
 
-      <EditableText defaultValue={initialTitle} onSave={setInitialTitle} tag="h1" className="font-bold mb-2" />
-      <EditableText defaultValue={initialDesc} onSave={setInitialDesc} tag="p" className="mb-2" />
-      <ol className="list-[lower-alpha] pl-6 mb-2">
-        {initialPoints.map((pt, i) => (
-          <li key={i} className="mb-1">
-            <EditableText defaultValue={pt} onSave={(val) => {
-              const updated = [...initialPoints];
-              updated[i] = val;
-              setInitialPoints(updated);
-            }} tag="span" />
-          </li>
-        ))}
-      </ol>
-      <EditableText defaultValue={initialNote} onSave={setInitialNote} tag="p" className="mb-4" />
+        <EditableText defaultValue={prepTitle} onSave={setPrepTitle} tag="h1" className="font-bold mb-2" />
+        <EditableText defaultValue={prepDesc} onSave={setPrepDesc} tag="p" className="mb-2" />
+        <ol className="list-[lower-alpha] pl-6 mb-2">
+          {prepPoints.map((pt, i) => (
+            <li key={i} className="mb-1">
+              <EditableText defaultValue={pt} onSave={(val) => {
+                const updated = [...prepPoints];
+                updated[i] = val;
+                setPrepPoints(updated);
+              }} tag="span" />
+            </li>
+          ))}
+        </ol>
+        <EditableText defaultValue={prepNote} onSave={setPrepNote} tag="p" className="mb-4" />
 
-      <EditableText defaultValue={followTitle} onSave={setFollowTitle} tag="h1" className="font-bold mb-2" />
-      <EditableText defaultValue={followDesc} onSave={setFollowDesc} tag="p" className="mb-2" />
+        <EditableText defaultValue={initialTitle} onSave={setInitialTitle} tag="h1" className="font-bold mb-2" />
+        <EditableText defaultValue={initialDesc} onSave={setInitialDesc} tag="p" className="mb-2" />
+        <ol className="list-[lower-alpha] pl-6 mb-2">
+          {initialPoints.map((pt, i) => (
+            <li key={i} className="mb-1">
+              <EditableText defaultValue={pt} onSave={(val) => {
+                const updated = [...initialPoints];
+                updated[i] = val;
+                setInitialPoints(updated);
+              }} tag="span" />
+            </li>
+          ))}
+        </ol>
+        <EditableText defaultValue={initialNote} onSave={setInitialNote} tag="p" className="mb-4" />
 
-      <EditableText defaultValue={followPointsTitle} onSave={setFollowPointsTitle} tag="p" className="font-semibold mb-1" />
-      <ol className="list-[lower-alpha] pl-6">
-        {followPoints.map((pt, i) => (
-          <li key={i} className="mb-1">
-            <EditableText defaultValue={pt} onSave={(val) => {
-              const updated = [...followPoints];
-              updated[i] = val;
-              setFollowPoints(updated);
-            }} tag="span" />
-          </li>
-        ))}
-      </ol>
+        <EditableText defaultValue={followTitle} onSave={setFollowTitle} tag="h1" className="font-bold mb-2" />
+        <EditableText defaultValue={followDesc} onSave={setFollowDesc} tag="p" className="mb-2" />
+
+        <EditableText defaultValue={followPointsTitle} onSave={setFollowPointsTitle} tag="p" className="font-semibold mb-1" />
+        <ol className="list-[lower-alpha] pl-6">
+          {followPoints.map((pt, i) => (
+            <li key={i} className="mb-1">
+              <EditableText defaultValue={pt} onSave={(val) => {
+                const updated = [...followPoints];
+                updated[i] = val;
+                setFollowPoints(updated);
+              }} tag="span" />
+            </li>
+          ))}
+        </ol>
+      </div>
     </div>
   );
 };
