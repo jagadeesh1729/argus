@@ -1,11 +1,20 @@
+// tailwind.config.js
 module.exports = {
+  // ...
+  content: ['./src/**/*.{js,ts,jsx,tsx}'],
   theme: {
-    extend: {},
+    extend: {
+      // ...
+    },
   },
-  corePlugins: {
-    preflight: false, // optional if you want full control
-  },
-  experimental: {
-    disableColorPalette: true, // disables oklch-based default palette
-  }
+  plugins: [
+    function ({ addUtilities }) {
+      addUtilities({
+        '.page-break': {
+          pageBreakBefore: 'always',
+          breakBefore: 'page',
+        },
+      });
+    },
+  ],
 };

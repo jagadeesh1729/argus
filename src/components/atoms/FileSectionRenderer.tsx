@@ -1,23 +1,39 @@
 import { useRecoilValue } from 'recoil';
 import { roleBasedFilesState } from '../../recoil/state/formState';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import EditableText from '../atoms/EditableText';
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
 import workerSrc from 'pdfjs-dist/build/pdf.worker.mjs?url';
 import mammoth from 'mammoth';
+import {
+  PAGE_COMMON_CLASSES,
+  PAGE_NUMBER_PLACEHOLDER_CLASSES,
+  INNER_PAGE_CONTENT_CLASSES
+} from '../../utils/pageStyles';
 
 GlobalWorkerOptions.workerSrc = workerSrc;
 
 const A4_HEIGHT = 1123;
 
-const FileSectionRenderer = ({ role, initialHeading }: { role: string; initialHeading: string }) => {
+const FileSectionRenderer = ({
+  role,
+  initialHeading,
+  notheading
+}: {
+  role: string;
+  initialHeading: string;
+  notheading?:boolean
+}) => {
   const filesMap = useRecoilValue(roleBasedFilesState);
-  const files = filesMap[role] || [];
-
+  const files = useMemo(() => filesMap[role] || [], [filesMap, role]);
   const [heading, setHeading] = useState(initialHeading);
   const [contentBlocks, setContentBlocks] = useState<JSX.Element[]>([]);
+  // const [rendered, setRendered] = useState(false);
 
   useEffect(() => {
+    // if (rendered) return;
+    // console.log('Rendering FileSectionRenderer for', role, 'with heading:', initialHeading);
+
     const renderFiles = async () => {
       const blocks: JSX.Element[] = [];
       let currentContent: JSX.Element[] = [];
@@ -26,27 +42,37 @@ const FileSectionRenderer = ({ role, initialHeading }: { role: string; initialHe
 
       const flushPage = () => {
         blocks.push(
-          <div
-            key={`page-${blocks.length}`}
-            className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] h-[1123px] mx-auto shadow overflow-hidden break-inside-avoid page-break flex flex-col"
-          >
-            {!headingRendered && (
-              <EditableText
-                tag="h1"
-                defaultValue={heading}
-                onSave={setHeading}
-                className="text-center text-amber-800 underline mb-6"
-              />
-            )}
-            {currentContent.map((block, i) => (
-              <div key={`content-${blocks.length}-${i}`}>{block}</div>
-            ))}
+          <div key={`page-${blocks.length}`} className={PAGE_COMMON_CLASSES}>
+            <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}></div>
+            <div className={INNER_PAGE_CONTENT_CLASSES}>
+            {!headingRendered && !notheading && (
+  <EditableText
+    tag="h1"
+    defaultValue={heading}
+    onSave={(newVal) => {
+      if (newVal !== heading) setHeading(newVal);
+    }}
+    className="text-center text-amber-800 underline mb-6"
+  />
+)}
+
+              {currentContent.map((block, i) => (
+                <div key={`content-${blocks.length}-${i}`}>{block}</div>
+              ))}
+            </div>
           </div>
         );
         currentContent = [];
         currentHeight = 0;
         headingRendered = true;
       };
+      
+      /* Nothing uploaded yet? — show a placeholder page */
+      if (files.length === 0) {
+        flushPage(); // just the heading
+        setContentBlocks(blocks);
+        return;
+      }
 
       for (const file of files) {
         const url = URL.createObjectURL(file);
@@ -55,17 +81,12 @@ const FileSectionRenderer = ({ role, initialHeading }: { role: string; initialHe
           const img = new Image();
           img.src = url;
           await img.decode();
-
           const estimatedHeight = Math.min(img.height, 800);
           if (currentHeight + estimatedHeight > A4_HEIGHT - 100) flushPage();
 
           currentContent.push(
             <div key={file.name} className="flex justify-center">
-              <img
-                src={url}
-                alt={file.name}
-                className="max-w-full max-h-[800px] object-contain"
-              />
+              <img src={url} alt={file.name} className="max-w-full max-h-[800px] object-contain" />
             </div>
           );
           currentHeight += estimatedHeight;
@@ -84,34 +105,28 @@ const FileSectionRenderer = ({ role, initialHeading }: { role: string; initialHe
             if (currentHeight > 0) flushPage();
 
             blocks.push(
-              <div
-                key={`${file.name}-pdf-${pageNum}`}
-                className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] h-[1123px] mx-auto shadow overflow-hidden break-inside-avoid page-break"
-              >
-   {!headingRendered && (
- <div className="mb-6">
-  {heading.split('\n').map((line, idx) => (
-    <div
-      key={idx}
-      className="text-center text-amber-800 underline text-sm font-medium"
-    >
-      {line}
-    </div>
-  ))}
-</div>
-
-)}
-
-                <img
-                  src={imgData}
-                  alt={`PDF page ${pageNum}`}
-                  className="max-w-full max-h-full object-contain"
-                />
+              <div key={`${file.name}-pdf-${pageNum}`} className={PAGE_COMMON_CLASSES}>
+                <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}></div>
+                <div className={INNER_PAGE_CONTENT_CLASSES}>
+                  {!headingRendered && (
+                    <div className="mb-6">
+                      {heading.split('\n').map((line, idx) => (
+                        <div key={idx} className="text-center text-amber-800 underline text-sm font-medium">
+                          {line}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  <img src={imgData} alt={`PDF page ${pageNum}`} className="max-w-full max-h-full object-contain" />
+                </div>
               </div>
             );
             headingRendered = true;
           }
-        } else if (file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') {
+        } else if (
+          file.type ===
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        ) {
           const arrayBuffer = await file.arrayBuffer();
           const result = await mammoth.convertToHtml({ arrayBuffer });
 
@@ -135,19 +150,21 @@ const FileSectionRenderer = ({ role, initialHeading }: { role: string; initialHe
             if (accumulatedHeight + nodeHeight > A4_HEIGHT - 100) {
               const html = tempPage.map(el => el.outerHTML).join('');
               blocks.push(
-                <div
-                  key={`${file.name}-docx-${i}`}
-                  className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] h-[1123px] mx-auto shadow overflow-hidden break-inside-avoid page-break prose prose-sm"
-                >
-                  {!headingRendered && (
-                    <EditableText
-                      tag="h1"
-                      defaultValue={heading}
-                      onSave={setHeading}
-                      className="text-center text-amber-800 underline mb-6"
-                    />
-                  )}
-                  <div dangerouslySetInnerHTML={{ __html: html }} />
+                <div key={`${file.name}-docx-${i}`} className={PAGE_COMMON_CLASSES}>
+                  <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}></div>
+                  <div className={`${INNER_PAGE_CONTENT_CLASSES} prose prose-sm`}>
+                    {!headingRendered && (
+                      <EditableText
+                        tag="h1"
+                        defaultValue={heading}
+                        onSave={(newVal) => {
+                          if (newVal !== heading) setHeading(newVal);
+                        }}
+                        className="text-center text-amber-800 underline mb-6"
+                      />
+                    )}
+                    <div dangerouslySetInnerHTML={{ __html: html }} />
+                  </div>
                 </div>
               );
               headingRendered = true;
@@ -162,19 +179,21 @@ const FileSectionRenderer = ({ role, initialHeading }: { role: string; initialHe
           if (tempPage.length > 0) {
             const html = tempPage.map(el => el.outerHTML).join('');
             blocks.push(
-              <div
-                key={`${file.name}-docx-final`}
-                className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] h-[1123px] mx-auto shadow overflow-hidden break-inside-avoid page-break prose prose-sm"
-              >
-                {!headingRendered && (
-                  <EditableText
-                    tag="h1"
-                    defaultValue={heading}
-                    onSave={setHeading}
-                    className="text-center text-amber-800 underline mb-6"
-                  />
-                )}
-                <div dangerouslySetInnerHTML={{ __html: html }} />
+              <div key={`${file.name}-docx-final`} className={PAGE_COMMON_CLASSES}>
+                <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}></div>
+                <div className={`${INNER_PAGE_CONTENT_CLASSES} prose prose-sm`}>
+                  {!headingRendered && (
+                    <EditableText
+                      tag="h1"
+                      defaultValue={heading}
+                      onSave={(newVal) => {
+                        if (newVal !== heading) setHeading(newVal);
+                      }}
+                      className="text-center text-amber-800 underline mb-6"
+                    />
+                  )}
+                  <div dangerouslySetInnerHTML={{ __html: html }} />
+                </div>
               </div>
             );
           }
@@ -182,21 +201,24 @@ const FileSectionRenderer = ({ role, initialHeading }: { role: string; initialHe
           document.body.removeChild(container);
         } else {
           if (currentHeight > 0) flushPage();
+
           blocks.push(
-            <div
-              key={file.name}
-              className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] h-[1123px] mx-auto shadow overflow-hidden break-inside-avoid page-break"
-            >
-              {!headingRendered && (
-                <EditableText
-                  tag="h1"
-                  defaultValue={heading}
-                  onSave={setHeading}
-                  className="text-center text-amber-800 underline mb-6"
-                />
-              )}
-              <p className="font-semibold mb-2">{file.name}</p>
-              <p className="text-red-500 text-sm">Preview not supported for this file.</p>
+            <div key={file.name} className={PAGE_COMMON_CLASSES}>
+              <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}></div>
+              <div className={INNER_PAGE_CONTENT_CLASSES}>
+                {!headingRendered && (
+                  <EditableText
+                    tag="h1"
+                    defaultValue={heading}
+                    onSave={(newVal) => {
+                      if (newVal !== heading) setHeading(newVal);
+                    }}
+                    className="text-center text-amber-800 underline mb-6"
+                  />
+                )}
+                <p className="font-semibold mb-2">{file.name}</p>
+                <p className="text-red-500 text-sm">Preview not supported for this file.</p>
+              </div>
             </div>
           );
           headingRendered = true;
@@ -204,11 +226,13 @@ const FileSectionRenderer = ({ role, initialHeading }: { role: string; initialHe
       }
 
       if (currentContent.length > 0) flushPage();
+
       setContentBlocks(blocks);
+      // setRendered(true);
     };
 
     renderFiles();
-  }, [files, heading]);
+  }, [files.length, initialHeading]);
 
   return <>{contentBlocks.map((block, index) => <div key={index}>{block}</div>)}</>;
 };

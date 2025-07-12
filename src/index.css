@@ -4,6 +4,11 @@
     page-break-after: always;
   }
 }
+.page-break {
+  page-break-before: always;
+  break-before: page;
+}
+
 /* Add to your CSS file */
 @media print, screen {
   .pdf-safe * {
@@ -20,3 +25,8 @@
     color: white !important;
   }
 }
+* {
+  box-sizing: border-box;
+  font-family: 'Segoe UI';
+}
+

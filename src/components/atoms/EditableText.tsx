@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 
 type EditableTextProps = {
-  tag: 'h1' | 'p' | 'span' | 'div'| 'strong';
+  tag: 'h1' | 'p' | 'span' | 'div'| 'strong' |'h2'|'h3';
   defaultValue: string;
   onSave: (value: string) => void;
   className?: string;

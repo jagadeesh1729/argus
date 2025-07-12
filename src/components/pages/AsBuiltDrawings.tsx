@@ -1,5 +1,9 @@
-import { useState } from 'react';
-import EditableText from '../atoms/EditableText';
+import { useState } from "react"
+import EditableText from "../atoms/EditableText"; // Assuming EditableText is correctly imported
+
+// Import the common page classes from your new utility file
+import { PAGE_COMMON_CLASSES, PAGE_NUMBER_PLACEHOLDER_CLASSES, INNER_PAGE_CONTENT_CLASSES } from '../../utils/pageStyles';
+
 
 const AsBuiltDrawings = () => {
   const [heading, setHeading] = useState('16. As-Built Drawings');
@@ -31,41 +35,50 @@ const AsBuiltDrawings = () => {
   };
 
   return (
-    <div className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] h-[1123px] mx-auto shadow break-inside-avoid page-break">
-      <EditableText
-        defaultValue={heading}
-        onSave={setHeading}
-        tag="h1"
-        className="text-center font-bold underline text-[15px] mb-4 text-amber-800"
-      />
+    // Outermost div now uses the reusable PAGE_COMMON_CLASSES constant
+    <div className={PAGE_COMMON_CLASSES}>
+      {/* Page number placeholder, positioned top-right */}
+      <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}>
+        {/* Page number will be inserted here by Flow's useEffect */}
+      </div>
 
-      <EditableText
-        defaultValue={intro}
-        onSave={setIntro}
-        tag="p"
-        className="text-sm mb-4 mt-7"
-      />
+      {/* Main content wrapper: Now uses INNER_PAGE_CONTENT_CLASSES for padding and flex-col layout */}
+      <div className={INNER_PAGE_CONTENT_CLASSES}>
+        <EditableText
+          defaultValue={heading}
+          onSave={setHeading}
+          tag="h1"
+          className="text-center font-bold underline text-[15px] mb-4 text-amber-800"
+        />
 
-      <ul className="list-none  text-sm mb-4">
-        {items.map((item, idx) => (
-          <li key={idx} className="flex gap-2 items-start mb-2">
-            <span className="mt-[3px]">&#x2610;</span>
-            <EditableText
-              defaultValue={item}
-              onSave={(val) => updateItem(idx, val)}
-              tag="span"
-              className="flex-1 ml-5"
-            />
-          </li>
-        ))}
-      </ul>
+        <EditableText
+          defaultValue={intro}
+          onSave={setIntro}
+          tag="p"
+          className="text-sm mb-4 mt-7"
+        />
 
-      <EditableText
-        defaultValue={note}
-        onSave={setNote}
-        tag="p"
-        className="text-sm"
-      />
+        <ul className="list-none text-sm mb-4">
+          {items.map((item, idx) => (
+            <li key={idx} className="flex gap-2 items-start mb-2">
+              <span className="mt-[3px]">&#x2610;</span>
+              <EditableText
+                defaultValue={item}
+                onSave={(val) => updateItem(idx, val)}
+                tag="span"
+                className="flex-1 ml-5"
+              />
+            </li>
+          ))}
+        </ul>
+
+        <EditableText
+          defaultValue={note}
+          onSave={setNote}
+          tag="p"
+          className="text-sm"
+        />
+      </div>
     </div>
   );
 };

@@ -98,7 +98,7 @@ const Threephaseupload = () => {
 
   return (
     <>
-      <div className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] h-[1123px] mx-auto shadow overflow-hidden break-inside-avoid page-break">
+      <div className="border-4 border-yellow-500 m-6 p-8 bg-white w-[794px] h-[1123px] mx-auto shadow page-number-placeholder relative  break-inside-avoid page-break">
         <EditableText
           tag="p"
           defaultValue={heading}
