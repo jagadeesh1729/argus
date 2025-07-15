@@ -37,6 +37,7 @@ import TestingPlanEditor              from './atoms/TestingPlanEditor';
 import TableOfContentsPage, { type TocEntry } from './atoms/TableOfContentsPage';
 import NoticeOfNoncompliance from './pages/NoticeOfNoncompliance';
 import QsrChecklist from './pages/QsrChecklist';
+import SavedDiagram from './atoms/SavedChartView';
 
 
 const Flow = () => {
@@ -52,7 +53,6 @@ const Flow = () => {
   const qcManagerHeading  = `4. Project Quality Control Manager, Superintendent, & Site Safety and Health Officer\nINSERT RESUME & QUALIFICATIONS [${qc_manager}]`;
   const altQcHeading      = `5. Project Alternate Quality Control Manager\nINSERT RESUME & QUALIFICATIONS [${alt_qc_manager}]`;
   const projectMgrHeading = `6. Project Manager\nINSERT RESUME & QUALIFICATIONS [${project_mgr}]`;
-  const orgChartHeading   = '3.\t ARGUS CJW JV LLC – Quality Control';
   const submittalHeading  = '10.Submittal Register & Submittal Procedures';
   const msg="The following checklists (enclosed) are used in conjunction; Preparatory, Initial and Follow-Up Phase reports."
 useEffect(() => {
@@ -231,11 +231,7 @@ useEffect(() => {
         <TableOfContentsPage tocData={tocData}/>
         <Purpose />
         <NameQualifications />
-
-        <FileSectionRenderer
-          role="flowchart"
-          initialHeading={orgChartHeading}
-        />
+        <SavedDiagram/>
         <FileSectionRenderer
           role="projectQualityControlManager"
           initialHeading={qcManagerHeading}

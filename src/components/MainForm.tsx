@@ -27,6 +27,7 @@ import InputField from "./atoms/InputFeild";
 import { useNavigate } from 'react-router';
 import TradesForm from './atoms/TradesForm';
 import SignatureUpload from './atoms/appointment/SignatureUpload';
+import SavedChartView from './atoms/SavedChartView';
 
 const MainForm = () => {
   const [contractNumber, setContractNumber] = useRecoilState(contractNumberState);
@@ -77,6 +78,9 @@ const isFormValid =
     filesMap["submittalRegister"]?.length &&
     filesMap["threephase"]?.length &&
     filesMap["qcr"]?.length;
+    const func=()=>{
+        navigate("/flowchart")
+    }
   return (
     <div className="p-6 max-w-5xl mx-auto bg-white rounded shadow space-y-6">
       <h2 className="text-2xl font-bold text-center">Project Information Form</h2>
@@ -107,7 +111,9 @@ const isFormValid =
       <InputField label="Description of the work" value={workDescription} onChange={e => setWorkDescription(e.target.value)} multiline className='h-52'  />
 
       <h3 className="text-lg font-semibold text-center">Uploads</h3>
-      <FileUploadByRole role="flowchart" text="Organizational Chart" />
+      {/* <FileUploadByRole role="flowchart" text="Organizational Chart" /> */}
+      <h1>Organizational Chart</h1>
+      <button onClick={func} className='mt-4 px-6 py-2 rounded shadow transition bg-blue-700 text-white'>Click here to Do Organization Chart</button>
       <FileUploadByRole role="projectQualityControlManager" text="Project Quality Control Manager, Superintendent, & Site Safety and Health Officer\nINSERT RESUME & QUALIFICATIONS" />
       <FileUploadByRole role="alternateProjectManager" text="Project Alternate Quality Control Manager\nINSERT RESUME & QUALIFICATIONS" />
       <FileUploadByRole role="projectManager" text="Project Manager\nINSERT RESUME & QUALIFICATIONS" />
@@ -126,10 +132,11 @@ const isFormValid =
       <InputField label="Enter President Name" value={pres} onChange={e => setPres(e.target.value)} />
       <FileUploadByRole role='threephase' text='Follow-Up Phase reports' />
       <FileUploadByRole role='qcr' text='Quality Control Daily Report '/>
+      <SavedChartView/>
       <div className="text-center">
       <button
           onClick={() => navigate("/flow")}
-          disabled={!isFormValid}
+          // disabled={!isFormValid}
           className={`mt-4 px-6 py-2 rounded shadow transition ${
             isFormValid ? 'bg-black text-white hover:bg-gray-800' : 'bg-gray-300 text-gray-500 cursor-not-allowed'
           }`}
