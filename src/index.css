@@ -29,4 +29,9 @@
   box-sizing: border-box;
   font-family: 'Segoe UI';
 }
+#root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 
