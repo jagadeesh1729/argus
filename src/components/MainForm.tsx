@@ -16,6 +16,7 @@ import {
   workDescriptionState,
   companyNameState,
   shortCompanyNameState,
+  companyAddressState,
   letterDateState,
   letterAddressState,
   presName,
@@ -45,38 +46,21 @@ const MainForm = () => {
   const [workDescription, setWorkDescription] = useRecoilState(workDescriptionState);
   const [companyName, setCompanyName] = useRecoilState(companyNameState);
   const [shortCompanyName, setShortCompanyName] = useRecoilState(shortCompanyNameState);
+  const [companyAddress, setCompanyAddress] = useRecoilState(companyAddressState);
   const [date, setDate] = useRecoilState(letterDateState);
   const [address, setAddress] = useRecoilState(letterAddressState);
   const [pres, setPres] = useRecoilState(presName);
    const [filesMap] = useRecoilState(roleBasedFilesState);
   const navigate = useNavigate();
-const isFormValid =
-    contractNumber.trim() &&
-    deliveryOrderNo.trim() &&
-    workOrder.trim() &&
-    contractorName.trim() &&
-    location.trim() &&
-    companyName.trim() &&
-    shortCompanyName.trim() &&
-    qcManager.trim() &&
-    qcManagerPhone.trim() &&
-    altQcManager.trim() &&
-    altQcManagerPhone.trim() &&
-    projectManager.trim() &&
-    projectManagerPhone.trim() &&
-    corporateSafetyOfficer.trim() &&
-    corporateSafetyPhone.trim() &&
-    workDescription.trim() &&
-    date.trim() &&
-    address.trim() &&
-    pres.trim() &&
-    filesMap["flowchart"]?.length &&
-    filesMap["projectQualityControlManager"]?.length &&
-    filesMap["alternateProjectManager"]?.length &&
-    filesMap["projectManager"]?.length &&
-    filesMap["submittalRegister"]?.length &&
-    filesMap["threephase"]?.length &&
-    filesMap["qcr"]?.length;
+const isFormValid = Boolean(
+  filesMap["flowchart"]?.length &&
+  filesMap["projectQualityControlManager"]?.length &&
+  filesMap["alternateProjectManager"]?.length &&
+  filesMap["projectManager"]?.length &&
+  filesMap["submittalRegister"]?.length &&
+  filesMap["threephase"]?.length &&
+  filesMap["qcr"]?.length
+);
   return (
     <div className="p-6 max-w-5xl mx-auto bg-white rounded shadow space-y-6">
       <h2 className="text-2xl font-bold text-center">Project Information Form</h2>
@@ -89,6 +73,7 @@ const isFormValid =
         <InputField label="Location" value={location} onChange={e => setLocation(e.target.value)} />
         <InputField label="Company Name" value={companyName} onChange={e => setCompanyName(e.target.value)} />
         <InputField label="Company Short Name" value={shortCompanyName} onChange={e => setShortCompanyName(e.target.value)} />
+        <InputField label="Company Address" value={companyAddress} onChange={e => setCompanyAddress(e.target.value)} />
       </div>
 
       <h3 className="text-lg font-semibold">Key Personnel</h3>
@@ -107,6 +92,8 @@ const isFormValid =
       <InputField label="Description of the work" value={workDescription} onChange={e => setWorkDescription(e.target.value)} multiline className='h-52'  />
 
       <h3 className="text-lg font-semibold text-center">Uploads</h3>
+      <FileUploadByRole role="companyLogo" text="Company Logo" />
+      <FileUploadByRole role="contractorLogo" text="Contractor Logo" />
       <FileUploadByRole role="flowchart" text="Organizational Chart" />
       <FileUploadByRole role="projectQualityControlManager" text="Project Quality Control Manager, Superintendent, & Site Safety and Health Officer\nINSERT RESUME & QUALIFICATIONS" />
       <FileUploadByRole role="alternateProjectManager" text="Project Alternate Quality Control Manager\nINSERT RESUME & QUALIFICATIONS" />

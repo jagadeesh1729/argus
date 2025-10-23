@@ -1,5 +1,5 @@
 import { useRecoilValue } from 'recoil';
-import {  roleBasedFilesState } from '../../recoil/state/formState';
+import {  roleBasedFilesState, shortCompanyNameState } from '../../recoil/state/formState';
 import { useEffect, useState } from 'react';
 import EditableText from '../atoms/EditableText';
 import { GlobalWorkerOptions, getDocument } from 'pdfjs-dist';
@@ -9,7 +9,8 @@ import mammoth from 'mammoth';
 GlobalWorkerOptions.workerSrc = workerSrc;
 
 const OrganizationalChart = () => {
-  const [heading, setHeading] = useState("3.\tARGUS CJW JV LLC – Quality Control");
+  const shortCompanyName = useRecoilValue(shortCompanyNameState) || '';
+  const [heading, setHeading] = useState(`3.\t${shortCompanyName || 'Company'} – Quality Control`);
   const filesMap = useRecoilValue(roleBasedFilesState);
  
   const role = "flowchart";

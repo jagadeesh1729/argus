@@ -1,13 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import {
   contractNumberState,
   deliveryOrderNoState,
   workOrderState,
   locationState,
   contractorNameState,
+  companyNameState,
+  roleBasedFilesState,
+  companyAddressState,
 } from '../../recoil/state/formState';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import EditableText from '../atoms/EditableText';
 import { EditableRow } from '../atoms/EditableRow';
 
@@ -21,14 +24,33 @@ const HeaderPage = () => {
   const [workOrder, setWorkOrder] = useRecoilState(workOrderState);
   const [location, setLocation] = useRecoilState(locationState);
   const [contractorName, setContractorName] = useRecoilState(contractorNameState);
+  const [companyName, setCompanyName] = useRecoilState(companyNameState);
+  const [companyAddress, setCompanyAddress] = useRecoilState(companyAddressState);
+  const filesMap = useRecoilValue(roleBasedFilesState);
 
   const [title, setTitle] = useState('Quality Control Plan');
-  const [companyName, setCompanyName] = useState('Argus/CJW JV 3, LLC');
-  const [addressLine1, setAddressLine1] = useState('30 Catoctin Circle SE, Suite 10');
-  const [addressLine2, setAddressLine2] = useState('Leesburg, VA 20175');
   const [contactNumberLabel, setcontactNumberLabel] = useState("Contract Number:")
   const [deliveryOrderLabel, setdeliveryOrderLabel] = useState("Delivery Order No:")
   const [workOrderLabel, setworkOrderLabel] = useState("Work Order:")
+
+  // Small helper to safely render a logo from uploaded files
+  const LogoImage = ({ role, alt, className }: { role: string; alt: string; className?: string }) => {
+    const file = (filesMap[role] || [])[0];
+    const [src, setSrc] = useState<string | null>(null);
+
+    useEffect(() => {
+      if (!file) {
+        setSrc(null);
+        return;
+      }
+      const url = URL.createObjectURL(file);
+      setSrc(url);
+      return () => URL.revokeObjectURL(url);
+    }, [file]);
+
+    if (!src) return null; // Only show if provided from form upload
+    return <img src={src} alt={alt} className={className ?? 'object-contain'} />;
+  };
 
   return (
     // Outermost div now uses the reusable PAGE_COMMON_CLASSES constant
@@ -43,8 +65,8 @@ const HeaderPage = () => {
         {/* Logos and top section */}
         <div className='flex flex-col justify-between'>
           <div className="flex flex-col items-center space-y-6 mt-10">
-            <img src="/assets/companyLogo.png" alt="Argus Logo" className="object-contain" />
-            <img src="/assets/contractorLogo.png" alt="CJW Logo" className="object-contain w-80" />
+            <LogoImage role="companyLogo" alt="Company Logo" className="object-contain" />
+            <LogoImage role="contractorLogo" alt="Contractor Logo" className="object-contain w-80" />
           </div>
 
           {/* Title */}
@@ -76,8 +98,7 @@ const HeaderPage = () => {
         {/* Footer - moved to be the absolute last element on the page */}
         <div className="text-center text-[#001b8f] font-medium text-sm  pt-4 mt-auto"> {/* Added border-t and pt-4 */}
           <EditableText tag="p" defaultValue={companyName} onSave={setCompanyName} />
-          <EditableText tag="p" defaultValue={addressLine1} onSave={setAddressLine1} />
-          <EditableText tag="p" defaultValue={addressLine2} onSave={setAddressLine2} />
+          <EditableText tag="p" defaultValue={companyAddress} onSave={setCompanyAddress} />
         </div>
       </div>
     </div>

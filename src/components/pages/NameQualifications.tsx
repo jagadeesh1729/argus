@@ -1,4 +1,4 @@
-import { useRecoilState } from 'recoil';
+import { useRecoilState, useRecoilValue } from 'recoil';
 import {
   qcManagerState,
   altQcManagerState,
@@ -7,7 +7,8 @@ import {
   qcManagerPhoneState,
   altQcManagerPhoneState,
   projectManagerPhoneState,
-  corporateSafetyPhoneState
+  corporateSafetyPhoneState,
+  shortCompanyNameState
 } from '../../recoil/state/formState';
 import EditableText from '../atoms/EditableText';
 import { useState } from 'react';
@@ -17,6 +18,7 @@ import { PAGE_COMMON_CLASSES, PAGE_NUMBER_PLACEHOLDER_CLASSES, INNER_PAGE_CONTEN
 
 
 const NameQualifications = () => {
+  const shortCompanyName = useRecoilValue(shortCompanyNameState) || '';
   const [qcManager, setQcManager] = useRecoilState(qcManagerState);
   const [altQcManager, setAltQcManager] = useRecoilState(altQcManagerState);
   const [projectManager, setProjectManager] = useRecoilState(projectManagerState);
@@ -54,25 +56,25 @@ const NameQualifications = () => {
         </h1>
 
         <div className="grid grid-cols-2 gap-2 mb-6">
-          <p>Argus/CJW QC Manager/Superintendent/SSHO</p>
+          <p>{(shortCompanyName || 'Company')} QC Manager/Superintendent/SSHO</p>
           <p className="font-semibold">
             <EditableText tag="span" defaultValue={qcManager} onSave={setQcManager} />{' '}
             <EditableText tag="span" defaultValue={qcPhone} onSave={setQcPhone} />
           </p>
 
-          <p>Argus/CJW Alternate QC Manager/SSHO</p>
+          <p>{(shortCompanyName || 'Company')} Alternate QC Manager/SSHO</p>
           <p className="font-semibold">
             <EditableText tag="span" defaultValue={altQcManager} onSave={setAltQcManager} />{' '}
             <EditableText tag="span" defaultValue={altQcPhone} onSave={setAltQcPhone} />
           </p>
 
-          <p>Argus/CJW Project Manager</p>
+          <p>{(shortCompanyName || 'Company')} Project Manager</p>
           <p className="font-semibold">
             <EditableText tag="span" defaultValue={projectManager} onSave={setProjectManager} />{' '}
             <EditableText tag="span" defaultValue={projectPhone} onSave={setProjectPhone} />
           </p>
 
-          <p>Argus/CJW Corporate Safety Officer</p>
+          <p>{(shortCompanyName || 'Company')} Corporate Safety Officer</p>
           <p className="font-semibold">
             <EditableText tag="span" defaultValue={corporateSafetyOfficer} onSave={setCorporateSafetyOfficer} />
             <EditableText tag="span" defaultValue={coopNumber} onSave={setcoopNumber} />
@@ -80,7 +82,7 @@ const NameQualifications = () => {
         </div>
 
         <p className="mb-4">
-          Argus/CJW has appointed{' '}
+          {(shortCompanyName || 'Company')} has appointed{' '}
           <EditableText tag="span" defaultValue={qcManager} onSave={setQcManager} className="font-bold" />{' '}
           <EditableText tag="span" defaultValue={d1} onSave={setd1} />{' '}
           <EditableText tag="span" defaultValue={t1} onSave={sett1} className="font-bold" />{' '}
@@ -88,7 +90,7 @@ const NameQualifications = () => {
         </p>
 
         <p className="mb-4">
-          Argus/CJW has appointed{' '}
+          {(shortCompanyName || 'Company')} has appointed{' '}
           <EditableText tag="span" defaultValue={altQcManager} onSave={setAltQcManager} className="font-bold" />{' '}
           <EditableText tag="span" defaultValue={d2} onSave={setd2} />{' '}
           <EditableText tag="span" defaultValue={t2} onSave={sett2} className="font-bold" />{' '}
@@ -96,7 +98,7 @@ const NameQualifications = () => {
         </p>
 
         <p>
-          Argus/CJW has appointed{' '}
+          {(shortCompanyName || 'Company')} has appointed{' '}
           <EditableText tag="span" defaultValue={projectManager} onSave={setProjectManager} className="font-bold" />{' '}
           <EditableText tag="span" defaultValue={d3} onSave={setd3} />{' '}
           <EditableText tag="span" defaultValue={t3} onSave={sett3} className="font-bold" />{' '}

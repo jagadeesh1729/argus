@@ -20,6 +20,13 @@ interface TableOfContentsPageProps {
 
 const TableOfContentsPage: React.FC<TableOfContentsPageProps> = ({ tocData }) => {
   const pageTitle = "TABLE OF CONTENTS";
+  const MAX_ROWS_PER_PAGE = 42; // conservative fit for A4 height with title/margins
+
+  const chunk = <T,>(arr: T[], size: number): T[][] => {
+    const out: T[][] = [];
+    for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+    return out;
+  };
 
 const renderTocEntry = (entry: TocEntry, index: number) => {
   const level = entry.level ?? 1;
@@ -48,21 +55,24 @@ const renderTocEntry = (entry: TocEntry, index: number) => {
   );
 };
 
-
+  const pages = chunk(tocData, MAX_ROWS_PER_PAGE);
 
   return (
-    <div className={PAGE_COMMON_CLASSES}>
-      <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}></div> {/* Page number will be inserted by Flow */}
-      <div className={INNER_PAGE_CONTENT_CLASSES}>
-        <h1 className="text-center text-2xl font-bold text-amber-800 underline mb-10 mt-10">
-          {pageTitle}
-        </h1>
-
-        <div className="flex-grow overflow-y-auto"> {/* Allow scrolling if TOC is very long */}
-          {tocData.map((entry, index) => renderTocEntry(entry, index))}
+    <>
+      {pages.map((entries, pIdx) => (
+        <div key={pIdx} className={PAGE_COMMON_CLASSES}>
+          <div className={PAGE_NUMBER_PLACEHOLDER_CLASSES}></div>
+          <div className={INNER_PAGE_CONTENT_CLASSES}>
+            <h1 className="text-center text-2xl font-bold text-amber-800 underline mb-10 mt-10">
+              {pageTitle}
+            </h1>
+            <div className="flex-grow">{/* no scroll; split into multiple pages */}
+              {entries.map((entry, index) => renderTocEntry(entry, pIdx * MAX_ROWS_PER_PAGE + index))}
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      ))}
+    </>
   );
 };
 

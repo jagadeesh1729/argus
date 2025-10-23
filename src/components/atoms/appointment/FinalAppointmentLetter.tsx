@@ -17,13 +17,13 @@ const FinalAppointmentLetter = () => {
     "Coordination and oversight of all inspections, tests, reports, and actions taken by the quality control organization.",
     "Submit daily inspection reports of all operations on the project indicating work performed, tests made, deficiencies found, and corrective actions taken.",
     "Keep adequate records of materials received and accepted by NAVFAC to ensure that only acceptable materials are incorporated.",
-    `Report to an executive of ${shortCompanyName}. Incorporated and work in close cooperation with the NAVFAC QA Team and the ${shortCompanyName}Board.`,
+    `Report to an executive of ${shortCompanyName}. Incorporated and work in close cooperation with the NAVFAC QA Team and the ${shortCompanyName} Board.`,
     "Assist, instruct and supervise any other member of the contractor quality team in performance of their duties if the need for additional or supplement personnel shall arise.",
     "Implement Three Phases of Quality Control as specified in the QC plan."
   ]);
     const [date,setDate] = useRecoilState(letterDateState);
     const [n1,setName]=useRecoilState(qcManagerState)
-    const [add, setadd] = useState("Argus/CJW JV 3 LLC\n30 Catoctin Circle SE,\n Suite 10 Leesburg, VA 20175\n")
+    const [add, setadd] = useState(`${shortCompanyName}\n`)
     const [Ref, setRef] = useState("Reference:")
   const [con, setcon] = useState("Contract No:")
   const [del, setdel] = useState("Delivery Order No:")

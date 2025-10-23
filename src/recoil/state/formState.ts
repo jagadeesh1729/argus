@@ -82,6 +82,12 @@ export const shortCompanyNameState = atom({
   default: '',
 });
 
+// Company address used on the Header page footer
+export const companyAddressState = atom({
+  key: 'companyAddress',
+  default: '',
+});
+
 export type TradeRow = {
   id: number;
   trade: string;

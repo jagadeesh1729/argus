@@ -8,6 +8,7 @@ import {
   altQcManagerState,
   projectManagerState,
   qcManagerState,
+  shortCompanyNameState,
 } from '../recoil/state/formState';
 
 import HeaderPage                    from '../components/pages/HeaderPage';
@@ -49,10 +50,11 @@ const Flow = () => {
   const alt_qc_manager= useRecoilValue(altQcManagerState)||null;
   const project_mgr   = useRecoilValue(projectManagerState)||null;
 
+  const shortCompanyName  = useRecoilValue(shortCompanyNameState) || '';
   const qcManagerHeading  = `4. Project Quality Control Manager, Superintendent, & Site Safety and Health Officer\nINSERT RESUME & QUALIFICATIONS [${qc_manager}]`;
   const altQcHeading      = `5. Project Alternate Quality Control Manager\nINSERT RESUME & QUALIFICATIONS [${alt_qc_manager}]`;
   const projectMgrHeading = `6. Project Manager\nINSERT RESUME & QUALIFICATIONS [${project_mgr}]`;
-  const orgChartHeading   = '3.\t ARGUS CJW JV LLC – Quality Control';
+  const orgChartHeading   = `3.\t ${shortCompanyName || 'Company'} – Quality Control`;
   const submittalHeading  = '10.Submittal Register & Submittal Procedures';
   const msg="The following checklists (enclosed) are used in conjunction; Preparatory, Initial and Follow-Up Phase reports."
 useEffect(() => {

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import EditableText from '../atoms/EditableText';
 import { useRecoilState } from 'recoil';
-import { contractNumberState, contractorNameState, deliveryOrderNoState, locationState, workOrderState } from '../../recoil/state/formState';
+import { companyNameState, contractNumberState, contractorNameState, deliveryOrderNoState, locationState, workOrderState } from '../../recoil/state/formState';
 import { EditableRow } from '../atoms/EditableRow';
 
 // Import the common page classes from your new utility file
@@ -9,7 +9,8 @@ import { PAGE_COMMON_CLASSES, PAGE_NUMBER_PLACEHOLDER_CLASSES, INNER_PAGE_CONTEN
 
 
 const AppointmentLetterHeading = () => {
-     const [heading, setHeading] = useState("9. ARGUS CJW JV LLC Appointment Letters");
+     const [companyName] = useRecoilState(companyNameState);
+     const [heading, setHeading] = useState(`9. ${companyName || 'Company'} Appointment Letters`);
        const [contractNumber, setContractNumber] = useRecoilState(contractNumberState);
        const [deliveryOrderNo, setDeliveryOrderNo] = useRecoilState(deliveryOrderNoState);
        const [workOrder, setWorkOrder] = useRecoilState(workOrderState);

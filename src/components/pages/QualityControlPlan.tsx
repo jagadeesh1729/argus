@@ -10,6 +10,7 @@ import {
   altQcManagerState,
   projectManagerState,
 } from '../../recoil/state/formState';
+import { shortCompanyNameState } from '../../recoil/state/formState';
 import EditableText from '../atoms/EditableText';
 
 // Import the common page classes from your new utility file
@@ -33,10 +34,12 @@ const QualityControlPlan = () => {
   const [labelWorkOrder, setLabelWorkOrder] = useState('Work Order:');
   const [labelContractName, setLabelContractName] = useState('Contract Name:');
   const [labelLocation, setLabelLocation] = useState('Location:');
-  const [labelQcManager, setLabelQcManager] = useState('Argus/CJW Quality Control Manager / Superintendent / SSHO');
-  const [labelAltQcManager, setLabelAltQcManager] = useState('Argus/CJW Alternate QC Manager');
-  const [labelProjectManager, setLabelProjectManager] = useState('Argus/CJW Project Manager');
-  const [labelSchedule, setLabelSchedule] = useState('Argus/CJW Work Schedule:');
+  const shortCompanyName = useRecoilValue(shortCompanyNameState) || '';
+  const companyLabel = shortCompanyName || 'Company';
+  const [labelQcManager, setLabelQcManager] = useState(`${companyLabel} Quality Control Manager / Superintendent / SSHO`);
+  const [labelAltQcManager, setLabelAltQcManager] = useState(`${companyLabel} Alternate QC Manager`);
+  const [labelProjectManager, setLabelProjectManager] = useState(`${companyLabel} Project Manager`);
+  const [labelSchedule, setLabelSchedule] = useState(`${companyLabel} Work Schedule:`);
   const [scheduleTime, setScheduleTime] = useState('Mon–Fri 0600 Hrs (6:00 AM) to 1700 Hrs (5:00 PM)');
 
   return (
