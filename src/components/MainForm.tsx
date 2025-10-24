@@ -28,8 +28,11 @@ import InputField from "./atoms/InputFeild";
 import { useNavigate } from 'react-router';
 import TradesForm from './atoms/TradesForm';
 import SignatureUpload from './atoms/appointment/SignatureUpload';
+import useNamesFromLink from '../hooks/useNamesFromLink';
 
 const MainForm = () => {
+  // Auto-load company/contractor names from link if provided
+  useNamesFromLink();
   const [contractNumber, setContractNumber] = useRecoilState(contractNumberState);
   const [deliveryOrderNo, setDeliveryOrderNo] = useRecoilState(deliveryOrderNoState);
   const [workOrder, setWorkOrder] = useRecoilState(workOrderState);

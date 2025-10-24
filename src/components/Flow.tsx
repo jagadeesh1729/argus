@@ -38,9 +38,12 @@ import TestingPlanEditor              from './atoms/TestingPlanEditor';
 import TableOfContentsPage, { type TocEntry } from './atoms/TableOfContentsPage';
 import NoticeOfNoncompliance from './pages/NoticeOfNoncompliance';
 import QsrChecklist from './pages/QsrChecklist';
+import useNamesFromLink from '../hooks/useNamesFromLink';
 
 
 const Flow = () => {
+  // Ensure names also load if user lands directly on /flow with a link
+  useNamesFromLink();
   const contentRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -158,9 +161,14 @@ useEffect(() => {
     const pdfW = doc.internal.pageSize.getWidth();
     const pdfH = doc.internal.pageSize.getHeight();
 
-    const pageEls = Array.from(
+    let pageEls = Array.from(
       contentRef.current!.querySelectorAll<HTMLElement>('.page-break'),
     );
+
+    // Fallback: if no explicit page containers found, snapshot the whole content
+    if (pageEls.length === 0) {
+      pageEls = [contentRef.current!];
+    }
     
 
     for (let i = 0; i < pageEls.length; i++) {
@@ -229,7 +237,7 @@ useEffect(() => {
 
       <div ref={contentRef} className="bg-white p-0">
         <HeaderPage />
-        <QualityControlPlan />'
+        <QualityControlPlan />
         <TableOfContentsPage tocData={tocData}/>
         <Purpose />
         <NameQualifications />
