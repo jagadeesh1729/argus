@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useRef, useState, useEffect } from 'react';
-import html2canvas from 'html2canvas-pro';     
-import jsPDF from 'jspdf';
 
 import { useRecoilValue } from 'recoil';
 import {
@@ -35,7 +33,7 @@ import ReworkProceduresPage           from './pages/ReworkProceduresPage';
 import ReworkItemsListPage            from './pages/ReworkItemsListPage';
 import DocumentControlProceduresPage  from './pages/DocumentControlProceduresPage;';
 import TestingPlanEditor              from './atoms/TestingPlanEditor';
-import TableOfContentsPage, { type TocEntry } from './atoms/TableOfContentsPage';
+import TableOfContentsPage, { type TocEntry, generateTocId } from './atoms/TableOfContentsPage';
 import NoticeOfNoncompliance from './pages/NoticeOfNoncompliance';
 import QsrChecklist from './pages/QsrChecklist';
 import useNamesFromLink from '../hooks/useNamesFromLink';
@@ -47,6 +45,7 @@ const Flow = () => {
   const contentRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generatingProgress, setGeneratingProgress] = useState(0);
     const [pageCount, setPageCount] = useState(0); // State to hold the total number of pages
  const [tocData, setTocData] = useState<TocEntry[]>([]);
   const qc_manager    = useRecoilValue(qcManagerState)||null;
@@ -69,7 +68,7 @@ useEffect(() => {
       const ph = p.querySelector<HTMLElement>('.page-number-placeholder');
       if (ph) ph.textContent = `Page${idx + 1}`;
     });
-    type Track = { start: number; end: number; level: number };
+    type Track = { start: number; end: number; level: number; id: string };
     const map = new Map<string, Track>();   // title → first/last page
 
     pages.forEach((page, idx) => {
@@ -81,6 +80,12 @@ useEffect(() => {
         if (!title || title === 'TABLE OF CONTENTS') return;  
 
         const level = parseInt(h.tagName[1]); 
+        const id = generateTocId(title, level);
+
+        // Add ID to the heading for navigation
+        if (!h.id) {
+          h.id = id;
+        }
 
         const key = `${level}-${title}`;     
         const tracked = map.get(key);
@@ -88,7 +93,7 @@ useEffect(() => {
         if (tracked) {
           tracked.end = pageNum;             
         } else {
-          map.set(key, { start: pageNum, end: pageNum, level });
+          map.set(key, { start: pageNum, end: pageNum, level, id });
         }
       });
     });
@@ -96,7 +101,8 @@ useEffect(() => {
       title     : [...map.entries()].find(([, val]) => val === v)![0].split('-').slice(1).join('-'),
       pageStart : v.start,
       pageEnd   : v.end,
-      level     : v.level
+      level     : v.level,
+      id        : v.id
     }));
 
     setPageCount(pages.length);
@@ -150,72 +156,171 @@ useEffect(() => {
 }
 
 
-  /* ——— main PDF routine ——— */  const handleDownload = async () => {
+  // Helper to convert image to base64
+  const imageToBase64 = (img: HTMLImageElement): Promise<string> => {
+    return new Promise((resolve) => {
+      if (img.src.startsWith('data:')) {
+        resolve(img.src);
+        return;
+      }
+      const canvas = document.createElement('canvas');
+      canvas.width = img.naturalWidth || img.width;
+      canvas.height = img.naturalHeight || img.height;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        try {
+          resolve(canvas.toDataURL('image/png'));
+        } catch (e) {
+          resolve(img.src); // fallback to original if CORS issue
+        }
+      } else {
+        resolve(img.src);
+      }
+    });
+  };
+
+  /* ——— main PDF routine - Native backend generation ——— */
+  const handleDownload = async () => {
     if (!contentRef.current) return;
 
     setIsGenerating(true);
+    setGeneratingProgress(10);
 
-    const doc = new jsPDF({ unit: 'pt', format: 'a4'//, compress: true 
-
-    });
-    const pdfW = doc.internal.pageSize.getWidth();
-    const pdfH = doc.internal.pageSize.getHeight();
-
-    let pageEls = Array.from(
-      contentRef.current!.querySelectorAll<HTMLElement>('.page-break'),
-    );
-
-    // Fallback: if no explicit page containers found, snapshot the whole content
-    if (pageEls.length === 0) {
-      pageEls = [contentRef.current!];
-    }
-    
-
-    for (let i = 0; i < pageEls.length; i++) {
-      const page = cloneWithStyles(pageEls[i]);
-
+    try {
+      // Get all page elements and update page numbers
+      const pageEls = Array.from(
+        contentRef.current.querySelectorAll<HTMLElement>('.page-break'),
+      );
       
-      page.style.position = 'absolute';
-      page.style.left = '-9999px';
-        let pageNumberEl = page.querySelector('.page-number-placeholder');
-    if (!pageNumberEl) {
-      pageNumberEl = document.createElement('div');
-      pageNumberEl.className = 'page-number-placeholder absolute bottom-8 right-8 text-sm text-gray-600';
-      page.appendChild(pageNumberEl);
-    }
-    pageNumberEl.textContent = `Page ${i + 1}`;
-      document.body.appendChild(page);
-
-      /* render to canvas */
-      const canvas = await html2canvas(page, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-          removeContainer: true,
+      // Update page numbers before capturing
+      pageEls.forEach((p, idx) => {
+        const ph = p.querySelector<HTMLElement>('.page-number-placeholder');
+        if (ph) ph.textContent = `Page ${idx + 1}`;
       });
-      document.body.removeChild(page);
 
-      /* fit image */
-      const ratio = Math.min(pdfW / canvas.width, pdfH / canvas.height);
-      const imgW  = canvas.width * ratio;
-      const imgH  = canvas.height * ratio;
-      const x = (pdfW - imgW) / 2;
-      const y = (pdfH - imgH) / 2;
+      setGeneratingProgress(15);
 
-      if (i > 0) doc.addPage();
-      doc.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imgW, imgH);
+      // Convert all images to base64
+      const images = Array.from(contentRef.current.querySelectorAll<HTMLImageElement>('img'));
+      const imagePromises = images.map(async (img) => {
+        const base64 = await imageToBase64(img);
+        return { img, base64 };
+      });
+      const imageResults = await Promise.all(imagePromises);
+      
+      // Store original src and replace with base64
+      const originalSrcs = imageResults.map(({ img, base64 }) => {
+        const original = img.src;
+        img.src = base64;
+        return { img, original };
+      });
 
-      doc.setFontSize(9);
-      // doc.text(
-      //   `Page ${i + 1} / ${pageEls.length}`,
-      //   pdfW - 60,
-      //   24,
-      // );
+      setGeneratingProgress(25);
+
+      // Get all styles from the document
+      const styles = Array.from(document.styleSheets)
+        .map(sheet => {
+          try {
+            return Array.from(sheet.cssRules)
+              .map(rule => rule.cssText)
+              .join('\n');
+          } catch (e) {
+            // External stylesheets may throw CORS errors
+            return '';
+          }
+        })
+        .join('\n');
+
+      // Build complete HTML with inline styles and explicit border styles
+      const html = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="UTF-8">
+          <style>
+            ${styles}
+            @page { size: A4; margin: 0; }
+            body { margin: 0; padding: 0; background: #f3f4f6; }
+            * { box-sizing: border-box; }
+            .page-break { 
+              page-break-after: always; 
+              page-break-inside: avoid;
+              break-after: page;
+              border: 4px solid #eab308 !important;
+              background: white !important;
+            }
+            .page-break:last-child { page-break-after: avoid; }
+            /* Ensure borders and lines are visible */
+            .border { border-style: solid !important; }
+            .border-2 { border-width: 2px !important; }
+            .border-4 { border-width: 4px !important; }
+            .border-yellow-500 { border-color: #eab308 !important; }
+            .border-gray-300 { border-color: #d1d5db !important; }
+            .border-gray-400 { border-color: #9ca3af !important; }
+            .border-black { border-color: #000 !important; }
+            .border-b { border-bottom-style: solid !important; }
+            .border-t { border-top-style: solid !important; }
+            .border-l { border-left-style: solid !important; }
+            .border-r { border-right-style: solid !important; }
+            .divide-y > * + * { border-top: 1px solid #e5e7eb !important; }
+            .divide-x > * + * { border-left: 1px solid #e5e7eb !important; }
+            hr { border-top: 1px solid #e5e7eb; }
+            table { border-collapse: collapse; }
+            th, td { border: 1px solid #d1d5db; }
+            .shadow { box-shadow: 0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px -1px rgba(0,0,0,0.1); }
+            /* TOC links styling */
+            a[data-toc-link] { text-decoration: none !important; color: inherit !important; }
+            a[data-toc-link]:hover { background-color: #fefce8; }
+            /* Images */
+            img { max-width: 100%; height: auto; }
+          </style>
+        </head>
+        <body>
+          ${contentRef.current.innerHTML}
+        </body>
+        </html>
+      `;
+
+      // Restore original image sources
+      originalSrcs.forEach(({ img, original }) => {
+        img.src = original;
+      });
+
+      setGeneratingProgress(40);
+
+      // Send to backend for native PDF generation
+      const response = await fetch('/api/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ html }),
+      });
+
+      setGeneratingProgress(80);
+
+      if (!response.ok) {
+        throw new Error('PDF generation failed');
+      }
+
+      // Download the PDF
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'QualityControlForm.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setGeneratingProgress(100);
+    } catch (error) {
+      console.error('PDF generation error:', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsGenerating(false);
+      setGeneratingProgress(0);
     }
-
-    doc.save('QualityControlForm.pdf');
-    setIsGenerating(false);
   };
 
 
@@ -231,14 +336,19 @@ useEffect(() => {
         } text-white px-4 py-2 rounded shadow mb-4`}
       >
         {isGenerating
-          ? 'Generating…'
+          ? `Generating… ${generatingProgress}%`
           : `Download PDF (${pageCount})`}
       </button>
 
       <div ref={contentRef} className="bg-white p-0">
         <HeaderPage />
         <QualityControlPlan />
-        <TableOfContentsPage tocData={tocData}/>
+        <TableOfContentsPage tocData={tocData} onNavigate={(id) => {
+          const element = document.getElementById(id);
+          if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }}/>
         <Purpose />
         <NameQualifications />
 

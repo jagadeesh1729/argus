@@ -12,13 +12,20 @@ export type TocEntry = {
   pageStart: number;
   pageEnd: number;
   level?: number; // 1 for h1, 2 for h2, etc.
+  id?: string; // ID for navigation
 };
 
 interface TableOfContentsPageProps {
   tocData: TocEntry[]; // Array of titles and page numbers
+  onNavigate?: (id: string) => void; // Callback for navigation
 }
 
-const TableOfContentsPage: React.FC<TableOfContentsPageProps> = ({ tocData }) => {
+// Helper to generate a valid ID from title
+export const generateTocId = (title: string, level: number): string => {
+  return `toc-${level}-${title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')}`;
+};
+
+const TableOfContentsPage: React.FC<TableOfContentsPageProps> = ({ tocData, onNavigate }) => {
   const pageTitle = "TABLE OF CONTENTS";
   const MAX_ROWS_PER_PAGE = 42; // conservative fit for A4 height with title/margins
 
@@ -28,9 +35,23 @@ const TableOfContentsPage: React.FC<TableOfContentsPageProps> = ({ tocData }) =>
     return out;
   };
 
+  const handleClick = (entry: TocEntry) => {
+    const id = entry.id || generateTocId(entry.title, entry.level ?? 1);
+    if (onNavigate) {
+      onNavigate(id);
+    } else {
+      // Default behavior: scroll to element
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }
+  };
+
 const renderTocEntry = (entry: TocEntry, index: number) => {
   const level = entry.level ?? 1;
   const indentPx = (level - 1) * 20;
+  const id = entry.id || generateTocId(entry.title, entry.level ?? 1);
 
   // Page range string
   const pageStr =
@@ -41,17 +62,23 @@ const renderTocEntry = (entry: TocEntry, index: number) => {
       : '';
 
   return (
-    <div
+    <a
       key={index}
-      className="flex items-baseline text-sm mb-1"
-      style={{ paddingLeft: `${indentPx}px` }}
+      href={`#${id}`}
+      className="flex items-baseline text-sm mb-1 cursor-pointer hover:bg-yellow-50 transition-colors rounded px-1 no-underline text-inherit"
+      style={{ paddingLeft: `${indentPx}px`, textDecoration: 'none', color: 'inherit' }}
+      onClick={(e) => {
+        e.preventDefault();
+        handleClick(entry);
+      }}
+      data-toc-link={id}
     >
       <div className="flex-grow flex overflow-hidden whitespace-nowrap">
-        <span className="truncate">{entry.title}</span>
+        <span className="truncate hover:text-blue-600 hover:underline">{entry.title}</span>
         <span className="flex-grow border-b border-dotted border-gray-400 mx-2"></span>
       </div>
       <span className="font-semibold text-right">{pageStr}</span>
-    </div>
+    </a>
   );
 };
 
