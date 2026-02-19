@@ -44,6 +44,9 @@ import useNamesFromLink from '../hooks/useNamesFromLink';
 const Flow = () => {
   // Ensure names also load if user lands directly on /flow with a link
   useNamesFromLink();
+  const PDF_CANVAS_SCALE = 1.25;
+  const PDF_MAX_PIXELS = 8_000_000;
+  const PDF_IMAGE_QUALITY = 0.8;
   const contentRef = useRef<HTMLDivElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -150,72 +153,93 @@ useEffect(() => {
 }
 
 
-  /* ——— main PDF routine ——— */  const handleDownload = async () => {
-    if (!contentRef.current) return;
+  const downscaleCanvas = (canvas: HTMLCanvasElement): HTMLCanvasElement => {
+    const pixels = canvas.width * canvas.height;
+    if (pixels <= PDF_MAX_PIXELS) return canvas;
+
+    const scale = Math.sqrt(PDF_MAX_PIXELS / pixels);
+    const resized = document.createElement('canvas');
+    resized.width = Math.max(1, Math.floor(canvas.width * scale));
+    resized.height = Math.max(1, Math.floor(canvas.height * scale));
+    const ctx = resized.getContext('2d');
+    if (ctx) {
+      ctx.drawImage(canvas, 0, 0, resized.width, resized.height);
+    }
+    return resized;
+  };
+
+  /* main PDF routine */
+  const handleDownload = async () => {
+    if (!contentRef.current || isGenerating) return;
 
     setIsGenerating(true);
 
-    const doc = new jsPDF({ unit: 'pt', format: 'a4'//, compress: true 
-
-    });
-    const pdfW = doc.internal.pageSize.getWidth();
-    const pdfH = doc.internal.pageSize.getHeight();
-
-    let pageEls = Array.from(
-      contentRef.current!.querySelectorAll<HTMLElement>('.page-break'),
-    );
-
-    // Fallback: if no explicit page containers found, snapshot the whole content
-    if (pageEls.length === 0) {
-      pageEls = [contentRef.current!];
-    }
-    
-
-    for (let i = 0; i < pageEls.length; i++) {
-      const page = cloneWithStyles(pageEls[i]);
-
-      
-      page.style.position = 'absolute';
-      page.style.left = '-9999px';
-        let pageNumberEl = page.querySelector('.page-number-placeholder');
-    if (!pageNumberEl) {
-      pageNumberEl = document.createElement('div');
-      pageNumberEl.className = 'page-number-placeholder absolute bottom-8 right-8 text-sm text-gray-600';
-      page.appendChild(pageNumberEl);
-    }
-    pageNumberEl.textContent = `Page ${i + 1}`;
-      document.body.appendChild(page);
-
-      /* render to canvas */
-      const canvas = await html2canvas(page, {
-        scale: 2,
-        useCORS: true,
-        backgroundColor: '#ffffff',
-        logging: false,
-          removeContainer: true,
+    try {
+      const doc = new jsPDF({
+        unit: 'pt',
+        format: 'a4',
+        compress: true,
+        putOnlyUsedFonts: true,
       });
-      document.body.removeChild(page);
+      const pdfW = doc.internal.pageSize.getWidth();
+      const pdfH = doc.internal.pageSize.getHeight();
 
-      /* fit image */
-      const ratio = Math.min(pdfW / canvas.width, pdfH / canvas.height);
-      const imgW  = canvas.width * ratio;
-      const imgH  = canvas.height * ratio;
-      const x = (pdfW - imgW) / 2;
-      const y = (pdfH - imgH) / 2;
+      let pageEls = Array.from(
+        contentRef.current.querySelectorAll<HTMLElement>('.page-break'),
+      );
 
-      if (i > 0) doc.addPage();
-      doc.addImage(canvas.toDataURL('image/png'), 'PNG', x, y, imgW, imgH);
+      // Fallback: if no explicit page containers found, snapshot the whole content
+      if (pageEls.length === 0) {
+        pageEls = [contentRef.current];
+      }
 
-      doc.setFontSize(9);
-      // doc.text(
-      //   `Page ${i + 1} / ${pageEls.length}`,
-      //   pdfW - 60,
-      //   24,
-      // );
+      for (let i = 0; i < pageEls.length; i++) {
+        const page = cloneWithStyles(pageEls[i]);
+        page.style.position = 'absolute';
+        page.style.left = '-9999px';
+
+        let pageNumberEl = page.querySelector('.page-number-placeholder');
+        if (!pageNumberEl) {
+          pageNumberEl = document.createElement('div');
+          pageNumberEl.className = 'page-number-placeholder absolute bottom-8 right-8 text-sm text-gray-600';
+          page.appendChild(pageNumberEl);
+        }
+        pageNumberEl.textContent = `Page ${i + 1}`;
+        document.body.appendChild(page);
+
+        try {
+          const canvas = await html2canvas(page, {
+            scale: PDF_CANVAS_SCALE,
+            useCORS: true,
+            backgroundColor: '#ffffff',
+            logging: false,
+            removeContainer: true,
+          });
+
+          const outputCanvas = downscaleCanvas(canvas);
+          const ratio = Math.min(pdfW / outputCanvas.width, pdfH / outputCanvas.height);
+          const imgW = outputCanvas.width * ratio;
+          const imgH = outputCanvas.height * ratio;
+          const x = (pdfW - imgW) / 2;
+          const y = (pdfH - imgH) / 2;
+          const imageData = outputCanvas.toDataURL('image/jpeg', PDF_IMAGE_QUALITY);
+
+          if (i > 0) doc.addPage();
+          doc.addImage(imageData, 'JPEG', x, y, imgW, imgH, undefined, 'MEDIUM');
+        } finally {
+          if (page.parentNode) {
+            page.parentNode.removeChild(page);
+          }
+        }
+      }
+
+      doc.save('QualityControlForm.pdf');
+    } catch (error) {
+      console.error('PDF generation failed:', error);
+      window.alert('PDF generation failed. Try reducing very large images and then retry.');
+    } finally {
+      setIsGenerating(false);
     }
-
-    doc.save('QualityControlForm.pdf');
-    setIsGenerating(false);
   };
 
 

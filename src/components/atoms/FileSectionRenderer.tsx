@@ -94,13 +94,15 @@ const FileSectionRenderer = ({
           const pdf = await getDocument(url).promise;
           for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
             const page = await pdf.getPage(pageNum);
-            const viewport = page.getViewport({ scale: 1.5 });
+            const viewport = page.getViewport({ scale: 1.2 });
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d')!;
             canvas.width = viewport.width;
             canvas.height = viewport.height;
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
             await page.render({ canvasContext: ctx, viewport }).promise;
-            const imgData = canvas.toDataURL();
+            const imgData = canvas.toDataURL('image/jpeg', 0.8);
 
             if (currentHeight > 0) flushPage();
 
